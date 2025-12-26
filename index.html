@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTB Trainer System</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans Thai', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+import React, { useState, useEffect } from 'react';
+import { User, Lock, Users, Search, Calendar, LogOut, CheckCircle, AlertCircle, Shield, Plus, Edit, Trash2, Filter, ChevronDown } from 'lucide-react';
+
+// --- MOCK DATA ตามข้อมูลผู้ใช้จริง ---
+const INITIAL_USERS = [
+  // Master (1 คน)
+  {
+    id: 1,
+    firstName: 'ญานภัทร',
+    lastName: 'จารุวงศ์ไพบูลย์',
+    username: 'ttb.yc',
+    email: 'yannapat.prudential@gmail.com',
+    calendarId: '243b7207b10b41ff52b0aa0ab258a75fe4c5a8f76225c53d24d931d6cc8a99ee@group.calendar.google.com',
+    team: 'Training Specialist',
+    role: 'Master',
+    password: '12345',
+    isFirstLogin: true
+  },
+  
+  // Admin (3 คน)
+  {
+    id: 2,
+    firstName: 'อนัญญา',
+    lastName: 'จันทรามาน',
+    username: 'ttb.ac',
+    email: 'Ananyacha10@gmail.com',
+    calendarId: 'f2a120b6ce63657310dee6b8701a11caeb5bf2dbaf02c9194816c5a38ee2b344@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Admin',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 3,
+    firstName: 'สุภาภร',
+    lastName: 'พลับพลี',
+    username: 'ttb.sp',
+    email: 'jibjib1981.SP@gmail.com',
+    calendarId: 'e5310de568ad3ed684fa94af07f5670d8cdb8090f9f65581c1ce59fc6f4472bc@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Admin',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 4,
+    firstName: 'ธนยศ',
+    lastName: 'เทียมเศวษ',
+    username: 'ttb.tt',
+    email: 'thanayot.calendar@gmail.com',
+    calendarId: '37a13d6c5a1c36c4804174f12a24a97c108c71b5e99eb0fd687319d3f588d192@group.calendar.google.com',
+    team: 'Training Specialist',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  
+  // Training Specialist Team (4 คน)
+  {
+    id: 5,
+    firstName: 'ณัฐกนิษฐ์',
+    lastName: 'จริยะดิลก',
+    username: 'ttb.nj',
+    email: 'natkanitjariyadilok@gmail.com',
+    calendarId: '98b8a1ab70a6106fe98df92197e9747d8fce761bcc8628495a70b1c3be6f8957@group.calendar.google.com',
+    team: 'Training Specialist',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 6,
+    firstName: 'พชร',
+    lastName: 'ภัทรตริรักษ์',
+    username: 'ttb.pp',
+    email: 'greatkaloo@gmail.com',
+    calendarId: '037fd257a582fbde120f72130516d20abc9bf6814089014b7f2d86a8039a30f8@group.calendar.google.com',
+    team: 'Training Specialist',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 7,
+    firstName: 'วัฒนพันธ์',
+    lastName: 'ชัยพูล',
+    username: 'ttb.wc',
+    email: 'wattanapan.ch@gmail.com',
+    calendarId: '930140c5f70462bcdf96239d1926a45518b036f5e542491de1d0aa5b4ef8849e@group.calendar.google.com',
+    team: 'Training Specialist',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 8,
+    firstName: 'อรรถพันธ์',
+    lastName: 'สุวรรณประดิษฐ์',
+    username: 'ttb.as',
+    email: 'arthaphs@gmail.com',
+    calendarId: '328ff6230842a54c7e819f2734bd58b9220f5daf04da5026ab9f75e7456ade51@group.calendar.google.com',
+    team: 'Training Specialist',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  
+  // Mandatory Team (5 คน)
+  {
+    id: 9,
+    firstName: 'อลงกรณ์',
+    lastName: 'ภู่อิ่ม',
+    username: 'ttb.ap',
+    email: 'korn.ak28@gmail.com',
+    calendarId: '05867807cc350ac519678d2654ff159669392a63b9cdf7d062a7ac3a3d5a547d@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 10,
+    firstName: 'นันทิดา',
+    lastName: 'ปิ่นหิรัญ',
+    username: 'ttb.np',
+    email: 'nantidapin6395@gmail.com',
+    calendarId: '103c1300e8eeaf9751c24f8a6342f8591185051d625337bc0de37886fca3e7b0@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 11,
+    firstName: 'พัชรียา',
+    lastName: 'นพวินญูวงค์',
+    username: 'ttb.pn',
+    email: 'patchareeya.n0412@gmail.com',
+    calendarId: '44dcf74062b5f3c057a13831193ed885386dce5625c284a9181c63332daa7fd6@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 12,
+    firstName: 'สุขสวัสดิ์',
+    lastName: 'ดิษสำเริง',
+    username: 'ttb.sd',
+    email: 'Wad008.dd@gmail.com',
+    calendarId: '7a161c4218b2a8ba1bc003df52a20bad2e63ec6e93801e8584a0d3955194bf61@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  },
+  {
+    id: 13,
+    firstName: 'สุพัฒน์',
+    lastName: 'คุณกิตติ',
+    username: 'ttb.sk',
+    email: 'Supat.koonkitti@gmail.com',
+    calendarId: '9bbab412406c7952deee5325d5d6f40b360745c2a1774f54916dc1f9a9e65fbe@group.calendar.google.com',
+    team: 'Mandatory',
+    role: 'Trainer',
+    password: '12345',
+    isFirstLogin: true
+  }
+];
+
+// Mock ข้อมูลวันว่าง (Free Days) - ปรับให้ตรงกับข้อมูลจริง
+const MOCK_AVAILABILITY = [
+  { id: 1, userId: 1, date: '2024-01-15', status: 'Available' },
+  { id: 2, userId: 2, date: '2024-01-15', status: 'Available' },
+  { id: 3, userId: 3, date: '2024-01-16', status: 'Available' },
+  { id: 4, userId: 4, date: '2024-01-16', status: 'Available' },
+  { id: 5, userId: 5, date: '2024-01-17', status: 'Available' },
+  { id: 6, userId: 6, date: '2024-01-17', status: 'Available' },
+  { id: 7, userId: 7, date: '2024-01-18', status: 'Available' },
+  { id: 8, userId: 8, date: '2024-01-18', status: 'Available' },
+  { id: 9, userId: 9, date: '2024-01-19', status: 'Available' },
+  { id: 10, userId: 10, date: '2024-01-19', status: 'Available' },
+  { id: 11, userId: 11, date: '2024-01-20', status: 'Available' },
+  { id: 12, userId: 12, date: '2024-01-20', status: 'Available' },
+  { id: 13, userId: 13, date: '2024-01-21', status: 'Available' },
+];
+
+// กำหนดโครงสร้าง Task
+const MOCK_TASKS = [
+  {
+    id: 1,
+    userId: 1,
+    title: 'อบรมการใช้งานระบบ',
+    description: 'อบรมพนักงานใหม่ในการใช้งานระบบภายใน',
+    date: '2024-01-15',
+    time: '09:00',
+    duration: 3,
+    status: 'completed',
+    createdAt: '2024-01-10T09:00:00'
+  },
+  {
+    id: 2,
+    userId: 2,
+    title: 'ประชุมทีม Mandatory',
+    description: 'ประชุมประจำสัปดาห์ทีม Mandatory',
+    date: '2024-01-16',
+    time: '14:00',
+    duration: 2,
+    status: 'in-progress',
+    createdAt: '2024-01-11T10:30:00'
+  },
+  {
+    id: 3,
+    userId: 5,
+    title: 'ออกแบบคอร์สฝึกอบรม',
+    description: 'ออกแบบคอร์สฝึกอบรมสำหรับพนักงานระดับกลาง',
+    date: '2024-01-17',
+    time: '10:00',
+    duration: 4,
+    status: 'pending',
+    createdAt: '2024-01-12T11:00:00'
+  },
+  {
+    id: 4,
+    userId: 9,
+    title: 'ประเมินผลการฝึกอบรม',
+    description: 'ประเมินผลการฝึกอบรมไตรมาสที่ 1',
+    date: '2024-01-18',
+    time: '13:30',
+    duration: 2,
+    status: 'pending',
+    createdAt: '2024-01-13T09:15:00'
+  },
+];
+
+// --- COMPONENTS ---
+
+export default function App() {
+  // Global State - โหลดจาก localStorage หากมี
+  const [users, setUsers] = useState(() => {
+    const savedUsers = localStorage.getItem('trainer_users');
+    return savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
+  });
+  
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem('trainer_currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  
+  const [mode, setMode] = useState('PROD');
+  
+  // Task Management State
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('trainer_tasks');
+    return savedTasks ? JSON.parse(savedTasks) : MOCK_TASKS;
+  });
+  
+  const [availability, setAvailability] = useState(() => {
+    const savedAvail = localStorage.getItem('trainer_availability');
+    return savedAvail ? JSON.parse(savedAvail) : MOCK_AVAILABILITY;
+  });
+
+  // Login Form State
+  const [loginUser, setLoginUser] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+  const [uatRole, setUatRole] = useState('Trainer');
+  const [error, setError] = useState('');
+
+  // Change Password State
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showChangePwdModal, setShowChangePwdModal] = useState(false);
+  const [tempUserForPwdChange, setTempUserForPwdChange] = useState(null);
+
+  // App Dashboard State
+  const [activeTab, setActiveTab] = useState('search');
+  const [searchTeam, setSearchTeam] = useState('all');
+  const [searchDate, setSearchDate] = useState('');
+
+  // Task Management State
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '09:00',
+    duration: 1,
+    status: 'pending'
+  });
+
+  // Master Management State
+  const [showMasterModal, setShowMasterModal] = useState(false);
+  const [selectedDeleteOption, setSelectedDeleteOption] = useState('today');
+  const [selectedTrainerForDelete, setSelectedTrainerForDelete] = useState('all');
+
+  // บันทึกข้อมูลลง localStorage เมื่อ state เปลี่ยนแปลง
+  useEffect(() => {
+    localStorage.setItem('trainer_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('trainer_currentUser', JSON.stringify(currentUser));
+  }, [currentUser]);
+
+  useEffect(() => {
+    localStorage.setItem('trainer_tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('trainer_availability', JSON.stringify(availability));
+  }, [availability]);
+
+  // --- HANDLERS ---
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (mode === 'PROD') {
+      // Production Mode Login Logic - แก้ไขการเปรียบเทียบ username
+      const foundUser = users.find(
+        (u) => u.username.toLowerCase() === loginUser.toLowerCase().trim() && u.password === loginPass
+      );
+
+      if (foundUser) {
+        if (foundUser.isFirstLogin) {
+          setTempUserForPwdChange(foundUser);
+          setShowChangePwdModal(true);
+        } else {
+          setCurrentUser(foundUser);
+        }
+      } else {
+        setError('ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง');
+      }
+    } else {
+      // UAT Mode Login Logic
+      if (loginPass === '5555') {
+        // สร้าง Mock User ตาม Role ที่เลือก
+        const mockUATUser = {
+          id: 999,
+          firstName: 'UAT',
+          lastName: 'Tester',
+          username: `uat.${uatRole.toLowerCase()}`,
+          team: 'UAT-Team',
+          role: uatRole,
+          isFirstLogin: false
+        };
+        setCurrentUser(mockUATUser);
+      } else {
+        setError('รหัสผ่าน UAT ไม่ถูกต้อง');
+      }
+    }
+  };
+
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setError('รหัสผ่านใหม่ไม่ตรงกัน');
+      return;
+    }
+    if (newPassword.length < 4) {
+      setError('รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร');
+      return;
+    }
+
+    const updatedUsers = users.map(u => {
+      if (u.id === tempUserForPwdChange.id) {
+        return { ...u, password: newPassword, isFirstLogin: false };
+      }
+      return u;
+    });
+
+    setUsers(updatedUsers);
+    const updatedUser = updatedUsers.find(u => u.id === tempUserForPwdChange.id);
+    setCurrentUser(updatedUser);
+    setShowChangePwdModal(false);
+    setTempUserForPwdChange(null);
+    setNewPassword('');
+    setConfirmPassword('');
+    setError('');
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setLoginUser('');
+    setLoginPass('');
+    setError('');
+    setShowChangePwdModal(false);
+  };
+
+  // Task Handlers
+  const handleAddTask = (e) => {
+    e.preventDefault();
+    
+    const newTask = {
+      id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+      userId: currentUser.id,
+      ...taskForm,
+      createdAt: new Date().toISOString()
+    };
+    
+    setTasks([...tasks, newTask]);
+    setShowTaskModal(false);
+    resetTaskForm();
+  };
+
+  const handleEditTask = (e) => {
+    e.preventDefault();
+    
+    const updatedTasks = tasks.map(task => 
+      task.id === editingTask.id 
+        ? { ...task, ...taskForm }
+        : task
+    );
+    
+    setTasks(updatedTasks);
+    setShowTaskModal(false);
+    setEditingTask(null);
+    resetTaskForm();
+  };
+
+  const handleDeleteTask = (taskId) => {
+    // ตรวจสอบสิทธิ์: Trainer ลบได้เฉพาะงานตัวเอง, Admin/Master ลบได้ทั้งหมด
+    const taskToDelete = tasks.find(t => t.id === taskId);
+    
+    if (currentUser.role === 'Trainer' && taskToDelete.userId !== currentUser.id) {
+      setError('คุณไม่มีสิทธิ์ลบงานนี้ (เฉพาะงานของตัวเองเท่านั้น)');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+    
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
+
+  const handleEditTaskClick = (task) => {
+    // ตรวจสอบสิทธิ์: Trainer แก้ไขได้เฉพาะงานตัวเอง, Admin/Master แก้ไขได้ทั้งหมด
+    if (currentUser.role === 'Trainer' && task.userId !== currentUser.id) {
+      setError('คุณไม่มีสิทธิ์แก้ไขงานนี้ (เฉพาะงานของตัวเองเท่านั้น)');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+    
+    setEditingTask(task);
+    setTaskForm({
+      title: task.title,
+      description: task.description,
+      date: task.date,
+      time: task.time,
+      duration: task.duration,
+      status: task.status
+    });
+    setShowTaskModal(true);
+  };
+
+  const resetTaskForm = () => {
+    setTaskForm({
+      title: '',
+      description: '',
+      date: '',
+      time: '09:00',
+      duration: 1,
+      status: 'pending'
+    });
+  };
+
+  // Master Management Handlers
+  const handleMasterDelete = () => {
+    if (!currentUser || currentUser.role !== 'Master') {
+      setError('เฉพาะผู้ใช้งานระดับ Master เท่านั้นที่สามารถใช้ฟังก์ชันนี้ได้');
+      return;
+    }
+
+    let tasksToDelete = [...tasks];
+    const today = new Date().toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+
+    switch (selectedDeleteOption) {
+      case 'today':
+        tasksToDelete = tasksToDelete.filter(task => task.date === today);
+        break;
+      case 'week':
+        // ลบงานของสัปดาห์นี้ (คำนวณวันเริ่มต้นและสิ้นสุดสัปดาห์)
+        const now = new Date();
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        const endOfWeek = new Date(now.setDate(now.getDate() + 6));
+        tasksToDelete = tasksToDelete.filter(task => {
+          const taskDate = new Date(task.date);
+          return taskDate >= startOfWeek && taskDate <= endOfWeek;
+        });
+        break;
+      case 'month':
+        tasksToDelete = tasksToDelete.filter(task => {
+          const taskMonth = new Date(task.date).getMonth() + 1;
+          return taskMonth === currentMonth;
+        });
+        break;
+      case 'year':
+        tasksToDelete = tasksToDelete.filter(task => {
+          const taskYear = new Date(task.date).getFullYear();
+          return taskYear === currentYear;
+        });
+        break;
+      case 'specific':
+        if (selectedTrainerForDelete !== 'all') {
+          const trainerId = parseInt(selectedTrainerForDelete);
+          tasksToDelete = tasksToDelete.filter(task => task.userId === trainerId);
+        }
+        break;
+      case 'all':
+        // ลบทั้งหมด
+        break;
+    }
+
+    // ถ้าเลือกเฉพาะ trainer ให้ลบเฉพาะงานของ trainer นั้น
+    if (selectedDeleteOption === 'specific' && selectedTrainerForDelete !== 'all') {
+      const trainerId = parseInt(selectedTrainerForDelete);
+      tasksToDelete = tasks.filter(task => task.userId === trainerId);
+    }
+
+    // ยืนยันการลบ
+    if (tasksToDelete.length > 0) {
+      if (window.confirm(`ต้องการลบ ${tasksToDelete.length} งานใช่หรือไม่?`)) {
+        const remainingTasks = tasks.filter(task => !tasksToDelete.some(t => t.id === task.id));
+        setTasks(remainingTasks);
+        alert(`ลบงานเรียบร้อยแล้ว (${tasksToDelete.length} งาน)`);
+      }
+    } else {
+      alert('ไม่พบงานที่ตรงกับเงื่อนไข');
+    }
+
+    setShowMasterModal(false);
+  };
+
+  // --- RENDER HELPERS ---
+  const teamOptions = [...new Set(users.map(u => u.team))];
+  
+  const filteredAvailability = availability.filter(item => {
+    const user = users.find(u => u.id === item.userId);
+    if (!user) return false;
+
+    const matchTeam = searchTeam === 'all' || user.team === searchTeam;
+    const matchDate = searchDate === '' || item.date === searchDate;
+
+    return matchTeam && matchDate;
+  });
+
+  // กรองงานตามสิทธิ์
+  const userTasks = tasks.filter(task => {
+    if (currentUser.role === 'Master' || currentUser.role === 'Admin') {
+      return true;
+    }
+    return task.userId === currentUser.id;
+  });
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'in-progress': return 'bg-blue-100 text-blue-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'completed': return 'เสร็จสิ้น';
+      case 'in-progress': return 'กำลังดำเนินการ';
+      case 'pending': return 'รอดำเนินการ';
+      default: return status;
+    }
+  };
+
+  // --- VIEWS ---
+
+  if (showChangePwdModal) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 font-sans">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border-t-4 border-orange-500">
+          <h2 className="text-2xl font-bold text-blue-900 mb-2 flex items-center gap-2">
+            <Lock className="w-6 h-6" /> เปลี่ยนรหัสผ่าน
+          </h2>
+          <p className="text-gray-600 mb-6 text-sm">
+            เนื่องจากเป็นการเข้าสู่ระบบครั้งแรก กรุณากำหนดรหัสผ่านใหม่
+          </p>
+          
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm flex items-center gap-2">
+              <AlertCircle size={16} /> {error}
+            </div>
+          )}
+
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">รหัสผ่านใหม่</label>
+              <input
+                type="password"
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">ยืนยันรหัสผ่านใหม่</label>
+              <input
+                type="password"
+                required
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-900 text-white py-2 rounded-md hover:bg-blue-800 transition font-medium"
+            >
+              เปลี่ยนรหัสผ่านและเข้าสู่ระบบ
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Modal สำหรับเพิ่ม/แก้ไขงาน
+  if (showTaskModal) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              {editingTask ? 'แก้ไขงาน' : 'เพิ่มงานใหม่'}
+            </h2>
+            
+            <form onSubmit={editingTask ? handleEditTask : handleAddTask} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ชื่องาน</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={taskForm.title}
+                  onChange={(e) => setTaskForm({...taskForm, title: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">คำอธิบาย</label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                  value={taskForm.description}
+                  onChange={(e) => setTaskForm({...taskForm, description: e.target.value})}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                  <input
+                    type="date"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={taskForm.date}
+                    onChange={(e) => setTaskForm({...taskForm, date: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">เวลา</label>
+                  <input
+                    type="time"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={taskForm.time}
+                    onChange={(e) => setTaskForm({...taskForm, time: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ระยะเวลา (ชั่วโมง)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="8"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={taskForm.duration}
+                    onChange={(e) => setTaskForm({...taskForm, duration: parseInt(e.target.value)})}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={taskForm.status}
+                    onChange={(e) => setTaskForm({...taskForm, status: e.target.value})}
+                  >
+                    <option value="pending">รอดำเนินการ</option>
+                    <option value="in-progress">กำลังดำเนินการ</option>
+                    <option value="completed">เสร็จสิ้น</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowTaskModal(false);
+                    setEditingTask(null);
+                    resetTaskForm();
+                  }}
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+                >
+                  {editingTask ? 'บันทึกการแก้ไข' : 'เพิ่มงาน'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Modal สำหรับ Master Management
+  if (showMasterModal) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">จัดการข้อมูล (Master Only)</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">เลือกการลบข้อมูล</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={selectedDeleteOption}
+                  onChange={(e) => setSelectedDeleteOption(e.target.value)}
+                >
+                  <option value="today">ลบงานของวันนี้</option>
+                  <option value="week">ลบงานของสัปดาห์นี้</option>
+                  <option value="month">ลบงานของเดือนนี้</option>
+                  <option value="year">ลบงานของปีนี้</option>
+                  <option value="specific">ลบงานของ Trainer เฉพาะคน</option>
+                  <option value="all">ลบงานทั้งหมด</option>
+                </select>
+              </div>
+              
+              {selectedDeleteOption === 'specific' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">เลือก Trainer</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={selectedTrainerForDelete}
+                    onChange={(e) => setSelectedTrainerForDelete(e.target.value)}
+                  >
+                    <option value="all">ทั้งหมด</option>
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName} ({user.role})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              <div className="bg-red-50 border border-red-200 p-4 rounded-md">
+                <h3 className="text-red-800 font-bold mb-2">⚠️ คำเตือน</h3>
+                <p className="text-red-700 text-sm">
+                  การลบข้อมูลนี้ไม่สามารถกู้คืนได้ กรุณาตรวจสอบให้แน่ใจก่อนดำเนินการ
+                </p>
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowMasterModal(false)}
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  onClick={handleMasterDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  ลบข้อมูล
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 font-sans p-4">
+        <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-sm border-t-4 border-blue-900">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-blue-900">Team Scheduler</h1>
+            <p className="text-gray-500 text-sm">ระบบจัดการตารางงานทีม TTB Training</p>
+          </div>
+
+          {/* Mode Switcher */}
+          <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+            <button
+              onClick={() => { setMode('PROD'); setError(''); setLoginPass(''); }}
+              className={`flex-1 py-1 text-sm rounded-md transition ${mode === 'PROD' ? 'bg-white shadow text-blue-900 font-bold' : 'text-gray-500'}`}
+            >
+              Production
+            </button>
+            <button
+              onClick={() => { setMode('UAT'); setError(''); setLoginPass(''); }}
+              className={`flex-1 py-1 text-sm rounded-md transition ${mode === 'UAT' ? 'bg-white shadow text-orange-600 font-bold' : 'text-gray-500'}`}
+            >
+              UAT Mode
+            </button>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-xs flex items-center gap-2">
+              <AlertCircle size={16} /> {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            {mode === 'PROD' ? (
+              // PROD FORM
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Username</label>
+                  <div className="relative mt-1">
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="เช่น ttb.yc"
+                      className="pl-10 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      value={loginUser}
+                      onChange={(e) => setLoginUser(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Format: ttb.{'{ชื่อจริง1ตัว}'}{'{นามสกุล1ตัว}'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Password</label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    <input
+                      type="password"
+                      placeholder="กรุณากรอกรหัสผ่าน"
+                      className="pl-10 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      value={loginPass}
+                      onChange={(e) => setLoginPass(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              // UAT FORM
+              <>
+                <div className="bg-orange-50 border border-orange-200 p-3 rounded-md mb-2">
+                  <h3 className="text-orange-800 text-sm font-bold flex items-center gap-1">
+                    <Shield size={14}/> UAT Testing Mode
+                  </h3>
+                  <p className="text-xs text-orange-700 mt-1">
+                    ระบบจำลองการเข้าใช้งาน
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Select Role to Test</label>
+                  <select 
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    value={uatRole}
+                    onChange={(e) => setUatRole(e.target.value)}
+                  >
+                    <option value="Trainer">Trainer (ผู้ฝึกอบรม)</option>
+                    <option value="Admin">Admin (ผู้ดูแลระบบ)</option>
+                    <option value="Master">Master (ผู้จัดการระดับสูง)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">UAT Password</label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    <input
+                      type="password"
+                      placeholder="กรุณากรอกรหัสผ่าน UAT"
+                      className="pl-10 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      value={loginPass}
+                      onChange={(e) => setLoginPass(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <button
+              type="submit"
+              className={`w-full py-2 rounded-md text-white font-medium transition shadow-sm ${
+                mode === 'PROD' 
+                ? 'bg-blue-900 hover:bg-blue-800' 
+                : 'bg-orange-600 hover:bg-orange-700'
+              }`}
+            >
+              {mode === 'PROD' ? 'เข้าสู่ระบบ' : 'เข้าสู่ระบบ UAT'}
+            </button>
+          </form>
+          
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500 text-center">
+              © 2024 TTB Training System v1.0
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- MAIN APP (AFTER LOGIN) ---
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans">
+      {/* Navbar */}
+      <nav className="bg-white shadow-sm border-b border-gray-200 px-6 py-3 flex justify-between items-center sticky top-0 z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-900 rounded-md flex items-center justify-center text-white font-bold">T</div>
+          <span className="font-bold text-gray-800">TTB Training System</span>
+          {currentUser.id === 999 && (
+            <span className="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full border border-orange-200">
+              UAT Mode
+            </span>
+          )}
+          <span className={`text-xs px-2 py-0.5 rounded-full border ${
+            currentUser.role === 'Master' 
+              ? 'bg-purple-100 text-purple-700 border-purple-200'
+              : currentUser.role === 'Admin'
+              ? 'bg-green-100 text-green-700 border-green-200'
+              : 'bg-blue-100 text-blue-700 border-blue-200'
+          }`}>
+            {currentUser.role}
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-bold text-gray-800">{currentUser.firstName} {currentUser.lastName}</p>
+            <p className="text-xs text-gray-500">{currentUser.role} | {currentUser.team}</p>
+          </div>
+          {error && (
+            <div className="bg-red-50 text-red-600 px-3 py-1 rounded text-xs flex items-center gap-2">
+              <AlertCircle size={12} /> {error}
+            </div>
+          )}
+          <button 
+            onClick={handleLogout}
+            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition"
+            title="Logout"
+          >
+            <LogOut size={20} />
+          </button>
+        </div>
+      </nav>
+
+      <main className="max-w-6xl mx-auto p-6">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">ยินดีต้อนรับ, คุณ{currentUser.firstName}</h1>
+          <p className="text-gray-600">ระบบจัดการตารางฝึกอบรมและทรัพยากรทีม</p>
+          
+          <div className="flex flex-wrap gap-4 mt-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 min-w-[200px]">
+              <p className="text-sm text-gray-500">จำนวนงานทั้งหมด</p>
+              <p className="text-2xl font-bold text-gray-800">{userTasks.length}</p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 min-w-[200px]">
+              <p className="text-sm text-gray-500">สถานะว่าง</p>
+              <p className="text-2xl font-bold text-green-600">
+                {availability.filter(a => a.userId === currentUser.id).length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-4 border-b border-gray-200 mb-6">
+          <button 
+            onClick={() => setActiveTab('search')}
+            className={`pb-3 px-1 flex items-center gap-2 text-sm font-medium border-b-2 transition ${
+              activeTab === 'search' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Search size={18} /> ค้นหาวันว่าง
+          </button>
+          <button 
+            onClick={() => setActiveTab('tasks')}
+            className={`pb-3 px-1 flex items-center gap-2 text-sm font-medium border-b-2 transition ${
+              activeTab === 'tasks' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Calendar size={18} /> จัดการงาน
+          </button>
+          {currentUser.role === 'Master' && (
+            <button 
+              onClick={() => setShowMasterModal(true)}
+              className={`pb-3 px-1 flex items-center gap-2 text-sm font-medium border-b-2 transition ${
+                activeTab === 'master' ? 'border-purple-900 text-purple-900' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Filter size={18} /> Master Management
+            </button>
+          )}
+        </div>
+
+        {/* Content Area */}
+        {activeTab === 'search' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+              <h2 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Users size={20} className="text-blue-900"/> ค้นหาวันว่างของทีม
+              </h2>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">เลือกทีม</label>
+                  <select
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    value={searchTeam}
+                    onChange={(e) => setSearchTeam(e.target.value)}
+                  >
+                    <option value="all">ทั้งหมด (All Teams)</option>
+                    {teamOptions.map(team => (
+                      <option key={team} value={team}>{team}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">เลือกวันที่</label>
+                  <input 
+                    type="date"
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    value={searchDate}
+                    onChange={(e) => setSearchDate(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-0">
+              {filteredAvailability.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                      <tr>
+                        <th className="px-6 py-3">ชื่อ-นามสกุล</th>
+                        <th className="px-6 py-3">ทีม</th>
+                        <th className="px-6 py-3">วันที่</th>
+                        <th className="px-6 py-3">สถานะ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredAvailability.map((item) => {
+                        const user = users.find(u => u.id === item.userId);
+                        return (
+                          <tr key={item.id} className="hover:bg-gray-50/50 transition">
+                            <td className="px-6 py-4 font-medium text-gray-800">
+                              {user?.firstName} {user?.lastName}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {user?.team}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-gray-600">{item.date}</td>
+                            <td className="px-6 py-4">
+                              <span className="flex items-center text-green-600 text-sm font-medium">
+                                <CheckCircle size={14} className="mr-1" /> {item.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-10 text-center text-gray-400">
+                  <Search size={48} className="mx-auto mb-2 opacity-20" />
+                  <p>ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'tasks' && (
+          <div className="space-y-6">
+            {/* Header with Add Button */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold text-gray-800">
+                จัดการงานของคุณ ({userTasks.length} งาน)
+              </h2>
+              <button
+                onClick={() => setShowTaskModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+              >
+                <Plus size={18} /> เพิ่มงานใหม่
+              </button>
+            </div>
+
+            {/* Tasks List */}
+            {userTasks.length > 0 ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                      <tr>
+                        <th className="px-6 py-3">ชื่องาน</th>
+                        <th className="px-6 py-3">วันที่</th>
+                        <th className="px-6 py-3">เวลา</th>
+                        <th className="px-6 py-3">ระยะเวลา</th>
+                        <th className="px-6 py-3">สถานะ</th>
+                        <th className="px-6 py-3 text-right">จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {userTasks.map((task) => {
+                        const taskUser = users.find(u => u.id === task.userId);
+                        return (
+                          <tr key={task.id} className="hover:bg-gray-50/50 transition">
+                            <td className="px-6 py-4">
+                              <div>
+                                <p className="font-medium text-gray-800">{task.title}</p>
+                                <p className="text-xs text-gray-500 truncate max-w-xs">{task.description}</p>
+                                {(currentUser.role === 'Admin' || currentUser.role === 'Master') && taskUser && (
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    โดย: {taskUser.firstName} {taskUser.lastName}
+                                  </p>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-600">{task.date}</td>
+                            <td className="px-6 py-4 text-gray-600">{task.time}</td>
+                            <td className="px-6 py-4 text-gray-600">{task.duration} ชม.</td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                                {getStatusText(task.status)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => handleEditTaskClick(task)}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                                  title="แก้ไข"
+                                >
+                                  <Edit size={16} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTask(task.id)}
+                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                                  title="ลบ"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-200">
+                <Calendar size={64} className="mx-auto mb-4 text-blue-200" />
+                <h3 className="text-lg font-bold text-gray-800 mb-2">ยังไม่มีงาน</h3>
+                <p className="text-gray-500 mb-6">เริ่มต้นโดยการเพิ่มงานใหม่</p>
+                <button
+                  onClick={() => setShowTaskModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+                >
+                  <Plus size={18} /> เพิ่มงานแรกของคุณ
+                </button>
+              </div>
+            )}
+
+            {/* Statistics */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <h3 className="font-bold text-gray-800 mb-4">สถิติงาน</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-700">รอดำเนินการ</p>
+                  <p className="text-2xl font-bold text-blue-800">
+                    {userTasks.filter(t => t.status === 'pending').length}
+                  </p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <p className="text-sm text-yellow-700">กำลังดำเนินการ</p>
+                  <p className="text-2xl font-bold text-yellow-800">
+                    {userTasks.filter(t => t.status === 'in-progress').length}
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-green-700">เสร็จสิ้น</p>
+                  <p className="text-2xl font-bold text-green-800">
+                    {userTasks.filter(t => t.status === 'completed').length}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700">รวมชั่วโมง</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {userTasks.reduce((sum, task) => sum + task.duration, 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer className="mt-12 py-6 border-t border-gray-200 text-center text-gray-500 text-sm">
+        <p>TTB Training System v1.0 • {new Date().getFullYear()}</p>
+        <p className="mt-1">ระบบจัดการตารางฝึกอบรมและทรัพยากรทีม</p>
+      </footer>
+    </div>
+  );
+}
+    </script>
+</body>
+</html>

@@ -3,54 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Portal 2026</title>
+    <title>Training Portal 2026 | Modern Dashboard</title>
+    <!-- Tailwind CSS with Modern Design System -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <!-- Inter Font (Modern) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .icon { width: 20px; height: 20px; }
-        .icon-lg { width: 24px; height: 24px; }
-        .icon-xl { width: 28px; height: 28px; }
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #EEF2FF;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --surface: #FFFFFF;
+            --background: #F8FAFC;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --text-tertiary: #94A3B8;
+            --border: #E2E8F0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius-sm: 0.375rem;
+            --radius: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        .animate-pulse-slow {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Glassmorphism Effects */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Gradient Backgrounds */
+        .gradient-primary {
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+        }
+        .gradient-success {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+        .gradient-warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+        }
+        .gradient-info {
+            background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+        }
+
+        /* Custom Classes */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+        .highlight-shadow {
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        .neumorphic {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff;
+        }
+
+        /* Smooth Transitions */
+        .transition-all-smooth {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useMemo, useEffect, useRef } = React;
 
-        // Icons Components (simplified versions)
-        const CalendarIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-        const DashboardIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>;
-        const ListIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3" y2="6"/><line x1="3" y1="12" x2="3" y2="12"/><line x1="3" y1="18" x2="3" y2="18"/></svg>;
-        const UserIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-        const ChartIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>;
-        const LogoutIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
-        const SearchIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-        const PlusIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-        const CheckIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
-        const ClockIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-        const ChevronLeft = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>;
-        const ChevronRight = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>;
-        const MapPinIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
-        const FileIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>;
-        const AlertIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>;
-        const MenuIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
-        const XIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-        const DownloadIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
-        const TargetIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
-        const TrendingIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
-        const AwardIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>;
-        const LockIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
-        const HomeIcon = () => <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+        // Modern Icon Components with better contrast
+        const CalendarIcon = ({ className = "w-5 h-5" }) => 
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>;
+
+        const DashboardIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="9"/>
+                <rect x="14" y="3" width="7" height="5"/>
+                <rect x="14" y="12" width="7" height="9"/>
+                <rect x="3" y="16" width="7" height="5"/>
+            </svg>;
+
+        const ListIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3" y2="6"/><line x1="3" y1="12" x2="3" y2="12"/><line x1="3" y1="18" x2="3" y2="18"/>
+            </svg>;
+
+        const UserIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>;
+
+        const ChartIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>;
+
+        const LogoutIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>;
+
+        const SearchIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>;
+
+        const PlusIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>;
+
+        const CheckIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>;
+
+        const ClockIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>;
+
+        const ChevronLeft = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>;
+
+        const ChevronRight = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>;
+
+        const MapPinIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>;
+
+        const MenuIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>;
+
+        const XIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>;
+
+        const TargetIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+            </svg>;
+
+        const TrendingIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+            </svg>;
+
+        const AwardIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+            </svg>;
+
+        const LockIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>;
+
+        const HomeIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>;
+
+        const SettingsIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>;
+
+        const BellIcon = ({ className = "w-5 h-5" }) =>
+            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>;
 
         // INITIAL DATA
         const INITIAL_USERS = [
@@ -71,9 +296,9 @@
         ];
 
         const COURSE_GROUPS = [
-            { name: 'KASH School', courses: ['KASH school 1', 'KASH school 2'], color: 'bg-indigo-600', lightColor: 'bg-indigo-100', text: 'text-indigo-600' },
-            { name: 'Ramen', courses: ['Ramen 1', 'Ramen 2'], color: 'bg-rose-500', lightColor: 'bg-rose-100', text: 'text-rose-500' },
-            { name: 'Mama', courses: ['Mama 1', 'Mama 2'], color: 'bg-orange-500', lightColor: 'bg-orange-100', text: 'text-orange-500' }
+            { name: 'KASH School', courses: ['KASH school 1', 'KASH school 2'], color: 'bg-gradient-to-r from-indigo-500 to-purple-600', lightColor: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100' },
+            { name: 'Ramen', courses: ['Ramen 1', 'Ramen 2'], color: 'bg-gradient-to-r from-rose-500 to-pink-600', lightColor: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100' },
+            { name: 'Mama', courses: ['Mama 1', 'Mama 2'], color: 'bg-gradient-to-r from-amber-500 to-orange-500', lightColor: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' }
         ];
 
         const COURSES = ['KASH school 1', 'KASH school 2', 'Ramen 1', 'Ramen 2', 'Mama 1', 'Mama 2'];
@@ -89,13 +314,13 @@
         // COMPONENTS
         const StatusBadge = ({ status }) => {
             const styles = {
-                Planned: 'bg-blue-50 text-blue-700 border border-blue-100',
-                Confirmed: 'bg-yellow-50 text-yellow-700 border border-yellow-100',
-                Completed: 'bg-green-50 text-green-700 border border-green-100',
-                Cancelled: 'bg-red-50 text-red-700 border border-red-100',
+                Planned: 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold',
+                Confirmed: 'bg-amber-50 text-amber-700 border border-amber-200 font-semibold',
+                Completed: 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold',
+                Cancelled: 'bg-rose-50 text-rose-700 border border-rose-200 font-semibold',
             };
             return (
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${styles[status] || 'bg-gray-100'}`}>
+                <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
                     {status}
                 </span>
             );
@@ -104,13 +329,25 @@
         const UserInitial = ({ name, size = "md", className = "" }) => {
             const initials = name ? name.charAt(0).toUpperCase() : '?';
             const sizeClasses = {
-                sm: "w-8 h-8 text-xs", md: "w-10 h-10 text-sm", lg: "w-14 h-14 text-xl", xl: "w-20 h-20 text-3xl"
+                sm: "w-10 h-10 text-sm",
+                md: "w-12 h-12 text-base",
+                lg: "w-16 h-16 text-xl",
+                xl: "w-24 h-24 text-3xl"
             };
-            const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-rose-500', 'bg-amber-500'];
-            const bgColor = colors[name ? name.charCodeAt(0) % colors.length : 0];
+            
+            // Modern gradient colors based on name
+            const gradients = [
+                'bg-gradient-to-br from-indigo-500 to-purple-600',
+                'bg-gradient-to-br from-emerald-500 to-teal-600',
+                'bg-gradient-to-br from-rose-500 to-pink-600',
+                'bg-gradient-to-br from-amber-500 to-orange-500',
+                'bg-gradient-to-br from-blue-500 to-cyan-600'
+            ];
+            
+            const bgGradient = gradients[name ? name.charCodeAt(0) % gradients.length : 0];
 
             return (
-                <div className={`${sizeClasses[size]} ${bgColor} rounded-full flex items-center justify-center text-white font-bold shadow-sm ${className}`}>
+                <div className={`${sizeClasses[size]} ${bgGradient} rounded-2xl flex items-center justify-center text-white font-bold shadow-lg hover-lift transition-all duration-300 ${className}`}>
                     {initials}
                 </div>
             );
@@ -125,72 +362,136 @@
             const [selectedTraining, setSelectedTraining] = useState(null);
             const [isModalOpen, setIsModalOpen] = useState(false);
             const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+            const [notifications] = useState(3);
             
             const TODAY = new Date('2026-02-10');
 
-            // LOGIN COMPONENT
+            // Enhanced Login View with Modern Design
             const LoginView = () => {
                 const [selectedUser, setSelectedUser] = useState("");
                 const [passcode, setPasscode] = useState("");
                 const [error, setError] = useState("");
+                const [isLoading, setIsLoading] = useState(false);
 
-                const handleLogin = () => {
-                    const user = INITIAL_USERS.find(u => u.name === selectedUser);
-                    if (user && passcode === getPasscode(user.name)) {
-                        setCurrentUser(user);
-                        setIsAuthenticated(true);
-                        setView('dashboard');
-                    } else {
-                        setError("Invalid Passcode. Please try again.");
-                    }
+                const handleLogin = async () => {
+                    setIsLoading(true);
+                    // Simulate API call
+                    setTimeout(() => {
+                        const user = INITIAL_USERS.find(u => u.name === selectedUser);
+                        if (user && passcode === getPasscode(user.name)) {
+                            setCurrentUser(user);
+                            setIsAuthenticated(true);
+                            setView('dashboard');
+                        } else {
+                            setError("Invalid credentials. Please try again.");
+                        }
+                        setIsLoading(false);
+                    }, 800);
                 };
 
                 return (
-                    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 font-sans">
-                        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-                            <div className="bg-indigo-600 p-10 text-center text-white">
-                                <h1 className="text-4xl font-extrabold mb-2">Welcome!</h1>
-                                <p className="text-indigo-100 opacity-80">Training Development Course 2026</p>
-                            </div>
-                            <div className="p-8 space-y-6">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select Trainer</label>
-                                    <select 
-                                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                        value={selectedUser}
-                                        onChange={(e) => { setSelectedUser(e.target.value); setError(""); }}
-                                    >
-                                        <option value="">- Choose your name -</option>
-                                        {INITIAL_USERS.map(u => <option key={u.id} value={u.name}>{u.name} {u.isAdmin ? '(Admin)' : ''}</option>)}
-                                    </select>
+                    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4 font-sans">
+                        <div className="absolute inset-0 overflow-hidden">
+                            <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-slow"></div>
+                            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-slow" style={{animationDelay: '1s'}}></div>
+                        </div>
+                        
+                        <div className="relative w-full max-w-md glass rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+                            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                            
+                            <div className="p-10">
+                                <div className="text-center mb-8">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                        <HomeIcon className="w-10 h-10 text-white" />
+                                    </div>
+                                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-gradient">Training Portal 2026</h1>
+                                    <p className="text-slate-600 mt-2 font-medium">Modern Training Management System</p>
                                 </div>
-
-                                {selectedUser && (
-                                    <div className="space-y-1 animate-slide-up">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Passcode</label>
+                                
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                            <UserIcon className="w-4 h-4" />
+                                            Select Trainer
+                                        </label>
                                         <div className="relative">
-                                            <LockIcon />
-                                            <input 
-                                                type="password"
-                                                placeholder="Enter ttbXXX"
-                                                className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                                                value={passcode}
-                                                onChange={(e) => setPasscode(e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                                            />
+                                            <select 
+                                                className="w-full p-4 bg-white/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all appearance-none pl-12 pr-4 text-slate-700 font-medium"
+                                                value={selectedUser}
+                                                onChange={(e) => { setSelectedUser(e.target.value); setError(""); }}
+                                            >
+                                                <option value="" className="text-slate-400">Choose your name</option>
+                                                {INITIAL_USERS.map(u => 
+                                                    <option key={u.id} value={u.name} className="text-slate-700">
+                                                        {u.name} {u.isAdmin ? '(Admin)' : ''}
+                                                    </option>
+                                                )}
+                                            </select>
+                                            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                                                <ChevronRight className="w-4 h-4 text-slate-400" />
+                                            </div>
                                         </div>
                                     </div>
-                                )}
 
-                                {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
+                                    {selectedUser && (
+                                        <div className="space-y-2 animate-slide-in">
+                                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                                <LockIcon className="w-4 h-4" />
+                                                Passcode
+                                            </label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="password"
+                                                    placeholder="Enter your passcode"
+                                                    className="w-full pl-12 pr-4 py-4 bg-white/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 font-medium"
+                                                    value={passcode}
+                                                    onChange={(e) => setPasscode(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                                                />
+                                                <LockIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                                            </div>
+                                        </div>
+                                    )}
 
-                                <button 
-                                    onClick={handleLogin}
-                                    disabled={!selectedUser || !passcode}
-                                    className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                >
-                                    Enter System <ChevronRight />
-                                </button>
+                                    {error && (
+                                        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 animate-fade-in">
+                                            <div className="flex items-center gap-2 text-rose-600 font-medium">
+                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+                                                </svg>
+                                                {error}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <button 
+                                        onClick={handleLogin}
+                                        disabled={!selectedUser || !passcode || isLoading}
+                                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover:shadow-indigo-200 hover-lift transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Signing In...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Enter System
+                                                <ChevronRight className="w-5 h-5" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+                                    <p className="text-slate-500 text-sm">
+                                        Need help? Contact support at{' '}
+                                        <span className="text-indigo-600 font-medium">support@training.com</span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -199,7 +500,7 @@
 
             if (!isAuthenticated) return <LoginView />;
 
-            // DASHBOARD VIEW
+            // Modern Dashboard View
             const DashboardView = () => {
                 const projectStats = COURSE_GROUPS.map(group => {
                     const groupTrainings = trainings.filter(t => group.courses.includes(t.course));
@@ -213,89 +514,208 @@
                 const myPercent = myTrainings.length > 0 ? Math.round((myCompleted / myTrainings.length) * 100) : 0;
 
                 return (
-                    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-10">
-                        <div className="flex justify-between items-center">
+                    <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-12">
+                        {/* Header with Stats */}
+                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                             <div>
-                                <h1 className="text-2xl font-black text-gray-900">Dashboard</h1>
-                                <p className="text-gray-500">Welcome, {currentUser.name}</p>
+                                <h1 className="text-3xl font-bold text-slate-900">Dashboard Overview</h1>
+                                <p className="text-slate-600 mt-2">Welcome back, {currentUser.name}! Here's your training summary.</p>
                             </div>
-                            <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-                                <UserInitial name={currentUser.name} size="sm" />
-                                <div className="hidden sm:block">
-                                    <p className="text-xs font-bold text-gray-900">{currentUser.name}</p>
-                                    <p className="text-[10px] text-gray-400">{currentUser.role}</p>
+                            <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <button className="p-3 bg-white rounded-xl border border-slate-200 hover:border-slate-300 transition-all hover-lift relative">
+                                        <BellIcon />
+                                        {notifications > 0 && (
+                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                                                {notifications}
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                                <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm p-3 rounded-2xl border border-slate-200 shadow-sm">
+                                    <UserInitial name={currentUser.name} size="sm" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-slate-900">{currentUser.name}</p>
+                                        <p className="text-xs text-slate-500">{currentUser.role}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Project Progress */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {projectStats.map((stat, i) => (
-                                <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className={`w-8 h-8 ${stat.lightColor} ${stat.text} rounded-xl flex items-center justify-center mb-4`}>
-                                        <TrendingIcon />
+                        {/* Quick Stats Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-2xl border border-indigo-100 card-hover">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="p-3 bg-indigo-100 rounded-xl">
+                                        <ListIcon className="w-6 h-6 text-indigo-600" />
                                     </div>
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{stat.name}</h3>
-                                    <div className="flex items-baseline gap-2 mb-3">
-                                        <span className="text-3xl font-black text-gray-900">{stat.percent}%</span>
-                                        <span className="text-xs text-gray-400">Done</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                        <div className={`${stat.color} h-full transition-all duration-1000`} style={{ width: `${stat.percent}%` }}></div>
-                                    </div>
+                                    <span className="text-2xl font-bold text-slate-900">{myTrainings.length}</span>
                                 </div>
-                            ))}
+                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Total Tasks</h3>
+                                <p className="text-xs text-slate-500">Assigned training sessions</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-2xl border border-emerald-100 card-hover">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="p-3 bg-emerald-100 rounded-xl">
+                                        <CheckIcon className="w-6 h-6 text-emerald-600" />
+                                    </div>
+                                    <span className="text-2xl font-bold text-slate-900">{myCompleted}</span>
+                                </div>
+                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Completed</h3>
+                                <p className="text-xs text-slate-500">Finished sessions</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-amber-50 to-white p-6 rounded-2xl border border-amber-100 card-hover">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="p-3 bg-amber-100 rounded-xl">
+                                        <ClockIcon className="w-6 h-6 text-amber-600" />
+                                    </div>
+                                    <span className="text-2xl font-bold text-slate-900">{myTrainings.length - myCompleted}</span>
+                                </div>
+                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Pending</h3>
+                                <p className="text-xs text-slate-500">Upcoming sessions</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border border-purple-100 card-hover">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="p-3 bg-purple-100 rounded-xl">
+                                        <AwardIcon className="w-6 h-6 text-purple-600" />
+                                    </div>
+                                    <span className="text-2xl font-bold text-slate-900">Rank A</span>
+                                </div>
+                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Performance</h3>
+                                <p className="text-xs text-slate-500">Current ranking</p>
+                            </div>
                         </div>
 
-                        {/* My Summary */}
-                        <div className="bg-white rounded-[2rem] border border-gray-100 shadow-xl overflow-hidden flex flex-col lg:flex-row">
-                            <div className="lg:w-1/3 bg-slate-50 p-10 flex flex-col items-center text-center border-b lg:border-b-0 lg:border-r border-gray-100">
-                                <UserInitial name={currentUser.name} size="xl" className="ring-8 ring-white shadow-xl mb-6" />
-                                <h2 className="text-2xl font-black text-gray-900 mb-1">{currentUser.name}</h2>
-                                <p className="text-indigo-600 font-bold text-sm mb-8">{currentUser.role}</p>
-                                
-                                <div className="w-full space-y-2">
-                                    <div className="flex justify-between text-xs font-bold">
-                                        <span className="text-gray-400 uppercase">My Progress</span>
-                                        <span className="text-indigo-600">{myPercent}%</span>
+                        {/* Main Content Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Left Column - Progress & Profile */}
+                            <div className="lg:col-span-2 space-y-8">
+                                {/* Course Group Progress */}
+                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-xl font-bold text-slate-900">Course Progress</h2>
+                                        <span className="text-sm font-semibold text-indigo-600">{myPercent}% Overall</span>
                                     </div>
-                                    <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                                        <div className="bg-indigo-600 h-full transition-all duration-1000" style={{ width: `${myPercent}%` }}></div>
+                                    <div className="space-y-6">
+                                        {projectStats.map((stat, i) => (
+                                            <div key={i} className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm font-semibold text-slate-700">{stat.name}</span>
+                                                    <span className="text-sm font-bold text-slate-900">{stat.percent}%</span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className="h-full rounded-full transition-all duration-1000"
+                                                        style={{ 
+                                                            width: `${stat.percent}%`,
+                                                            background: `linear-gradient(90deg, ${stat.color.split(' ')[2]} 0%, ${stat.color.split(' ')[5]} 100%)`
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                                <div className="flex justify-between text-xs text-slate-500">
+                                                    <span>{stat.completed} completed</span>
+                                                    <span>{stat.total} total</span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <p className="text-[10px] text-gray-400">{myCompleted} / {myTrainings.length} courses completed</p>
+                                </div>
+
+                                {/* Upcoming Trainings */}
+                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-xl font-bold text-slate-900">Upcoming Sessions</h2>
+                                        <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                            View All →
+                                        </button>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {myTrainings.slice(0, 3).map(t => (
+                                            <div key={t.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl hover:bg-slate-50 transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`p-3 rounded-xl ${t.status === 'Completed' ? 'bg-emerald-100' : 'bg-indigo-100'}`}>
+                                                        {t.status === 'Completed' ? 
+                                                            <CheckIcon className="w-5 h-5 text-emerald-600" /> : 
+                                                            <ClockIcon className="w-5 h-5 text-indigo-600" />
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{t.course}</h4>
+                                                        <div className="flex items-center gap-3 mt-1">
+                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                                <CalendarIcon className="w-3 h-3" />
+                                                                {new Date(t.date).toLocaleDateString('en-GB')}
+                                                            </span>
+                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                                <MapPinIcon className="w-3 h-3" />
+                                                                {t.location}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <StatusBadge status={t.status} />
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div className="lg:w-2/3 p-10">
-                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">Performance Highlights</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                                    <div className="flex items-center gap-5">
-                                        <div className="p-4 bg-indigo-50 text-indigo-600 rounded-3xl"><ListIcon /></div>
-                                        <div>
-                                            <p className="text-3xl font-black text-gray-900">{myTrainings.length}</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase">Total Tasks</p>
+
+                            {/* Right Column - Profile Card */}
+                            <div className="space-y-8">
+                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-8 card-hover">
+                                    <div className="flex flex-col items-center text-center mb-6">
+                                        <UserInitial name={currentUser.name} size="xl" className="mb-4 ring-4 ring-white/20" />
+                                        <h3 className="text-xl font-bold mb-1">{currentUser.name}</h3>
+                                        <p className="text-slate-300 mb-4">{currentUser.role}</p>
+                                        <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden mb-2">
+                                            <div 
+                                                className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 transition-all duration-1000"
+                                                style={{ width: `${myPercent}%` }}
+                                            ></div>
+                                        </div>
+                                        <p className="text-sm text-slate-300">{myPercent}% Personal Progress</p>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
+                                            <span className="text-slate-300">Trainings Completed</span>
+                                            <span className="font-bold">{myCompleted}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
+                                            <span className="text-slate-300">Hours Logged</span>
+                                            <span className="font-bold">{myCompleted * 8} hrs</span>
+                                        </div>
+                                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
+                                            <span className="text-slate-300">Success Rate</span>
+                                            <span className="font-bold">{myPercent}%</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-5">
-                                        <div className="p-4 bg-emerald-50 text-emerald-600 rounded-3xl"><CheckIcon /></div>
-                                        <div>
-                                            <p className="text-3xl font-black text-gray-900">{myCompleted}</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase">Completed</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-5">
-                                        <div className="p-4 bg-amber-50 text-amber-600 rounded-3xl"><ClockIcon /></div>
-                                        <div>
-                                            <p className="text-3xl font-black text-gray-900">{myTrainings.length - myCompleted}</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase">Remaining</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-5">
-                                        <div className="p-4 bg-rose-50 text-rose-600 rounded-3xl"><AwardIcon /></div>
-                                        <div>
-                                            <p className="text-3xl font-black text-gray-900">Rank A</p>
-                                            <p className="text-xs font-bold text-gray-400 uppercase">Expertise</p>
-                                        </div>
+                                </div>
+
+                                {/* Quick Actions */}
+                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
+                                    <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
+                                    <div className="space-y-3">
+                                        <button className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-all group">
+                                            <span className="font-semibold">Add New Training</span>
+                                            <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                                        </button>
+                                        <button className="w-full flex items-center justify-between p-3 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all group">
+                                            <span className="font-semibold">Generate Report</span>
+                                            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            onClick={() => setView('calendar')}
+                                            className="w-full flex items-center justify-between p-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-all group"
+                                        >
+                                            <span className="font-semibold">View Calendar</span>
+                                            <CalendarIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -304,52 +724,139 @@
                 );
             };
 
-            // CALENDAR VIEW
+            // Modern Calendar View
             const CalendarView = () => {
                 const [curr, setCurr] = useState(new Date('2026-02-01'));
-                const next = () => setCurr(new Date(curr.setMonth(curr.getMonth() + 1)));
-                const prev = () => setCurr(new Date(curr.setMonth(curr.getMonth() - 1)));
+                const [viewMode, setViewMode] = useState('month'); // month, week, day
+                
+                const next = () => {
+                    const newDate = new Date(curr);
+                    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + 1);
+                    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + 7);
+                    else newDate.setDate(newDate.getDate() + 1);
+                    setCurr(newDate);
+                };
+                
+                const prev = () => {
+                    const newDate = new Date(curr);
+                    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() - 1);
+                    else if (viewMode === 'week') newDate.setDate(newDate.getDate() - 7);
+                    else newDate.setDate(newDate.getDate() - 1);
+                    setCurr(newDate);
+                };
                 
                 const days = new Date(curr.getFullYear(), curr.getMonth() + 1, 0).getDate();
                 const start = new Date(curr.getFullYear(), curr.getMonth(), 1).getDay();
 
                 return (
-                    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 flex flex-col h-full animate-fade-in max-w-6xl mx-auto w-full overflow-hidden">
-                        <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-white">
-                            <h2 className="text-2xl font-black text-gray-900">Training Calendar</h2>
-                            <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl">
-                                <button onClick={prev} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all"><ChevronLeft /></button>
-                                <span className="font-bold text-lg min-w-[150px] text-center">{curr.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-                                <button onClick={next} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all"><ChevronRight /></button>
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full animate-fade-in max-w-7xl mx-auto w-full overflow-hidden">
+                        {/* Calendar Header */}
+                        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-900">Training Calendar</h2>
+                                <p className="text-slate-600">View and manage your training schedule</p>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl">
+                                    {['month', 'week', 'day'].map(mode => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => setViewMode(mode)}
+                                            className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
+                                                viewMode === mode 
+                                                ? 'bg-white text-slate-900 shadow-sm' 
+                                                : 'text-slate-600 hover:text-slate-900'
+                                            }`}
+                                        >
+                                            {mode}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl">
+                                    <button onClick={prev} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all">
+                                        <ChevronLeft className="w-5 h-5 text-slate-600" />
+                                    </button>
+                                    <span className="font-bold text-lg min-w-[180px] text-center text-slate-900">
+                                        {curr.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                    </span>
+                                    <button onClick={next} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all">
+                                        <ChevronRight className="w-5 h-5 text-slate-600" />
+                                    </button>
+                                </div>
+                                
+                                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover:shadow-indigo-200 hover-lift transition-all">
+                                    <PlusIcon className="w-4 h-4 inline mr-2" />
+                                    Add Event
+                                </button>
                             </div>
                         </div>
-                        <div className="grid grid-cols-7 bg-slate-50 border-b border-gray-100">
+
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                                <div key={d} className="py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">{d}</div>
+                                <div key={d} className="py-4 text-center text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                    {d}
+                                </div>
                             ))}
                         </div>
+                        
                         <div className="grid grid-cols-7 flex-1 auto-rows-fr">
                             {Array.from({ length: 42 }).map((_, i) => {
                                 const day = i - start + 1;
                                 const isValid = day > 0 && day <= days;
                                 const dStr = `2026-${String(curr.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                                 const evts = isValid ? trainings.filter(t => t.date === dStr) : [];
+                                const isToday = TODAY.toISOString().split('T')[0] === dStr;
                                 
                                 return (
-                                    <div key={i} className={`min-h-[120px] p-3 border-r border-b border-gray-50 relative group ${isValid ? 'bg-white' : 'bg-slate-50/30'}`}>
+                                    <div 
+                                        key={i} 
+                                        className={`min-h-[140px] p-3 border-r border-b border-slate-50 relative group ${
+                                            isValid ? 'bg-white hover:bg-slate-50/50' : 'bg-slate-50/30'
+                                        } ${isToday ? 'highlight-shadow' : ''}`}
+                                    >
                                         {isValid && (
                                             <>
-                                                <span className={`text-sm font-bold w-8 h-8 flex items-center justify-center rounded-xl mb-2 ${TODAY.toISOString().split('T')[0] === dStr ? 'bg-indigo-600 text-white' : 'text-gray-400'}`}>{day}</span>
-                                                <div className="space-y-1">
-                                                    {evts.map(e => (
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className={`text-base font-bold w-8 h-8 flex items-center justify-center rounded-xl ${
+                                                        isToday 
+                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
+                                                        : 'text-slate-400'
+                                                    }`}>
+                                                        {day}
+                                                    </span>
+                                                    {isToday && (
+                                                        <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                                                            Today
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                
+                                                <div className="space-y-2">
+                                                    {evts.slice(0, 3).map(e => (
                                                         <div 
                                                             key={e.id} 
                                                             onClick={() => { setSelectedTraining(e); setIsModalOpen(true); }}
-                                                            className="text-[10px] p-2 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg truncate cursor-pointer font-bold hover:scale-105 transition-transform"
+                                                            className="text-xs p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl cursor-pointer font-semibold hover-lift transition-all group/item"
                                                         >
-                                                            {e.course}
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="truncate">{e.course}</span>
+                                                                <ChevronRight className="w-3 h-3 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                                            </div>
+                                                            <div className="text-[10px] text-indigo-600/70 mt-1 flex items-center gap-1">
+                                                                <ClockIcon className="w-3 h-3" />
+                                                                {e.trainers.length} trainers
+                                                            </div>
                                                         </div>
                                                     ))}
+                                                    
+                                                    {evts.length > 3 && (
+                                                        <div className="text-xs text-slate-500 font-medium p-2 text-center">
+                                                            +{evts.length - 3} more
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -361,148 +868,355 @@
                 );
             };
 
-            // TRAINER VIEW
+            // Modern TrainerView
             const TrainerView = () => {
                 const myTrainings = trainings.filter(t => t.trainers.includes(currentUser.name));
-                return (
-                    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto w-full pb-10">
-                        <div className="flex items-center gap-4">
-                            <UserInitial name={currentUser.name} size="lg" />
-                            <div>
-                                <h2 className="text-3xl font-black text-gray-900">{currentUser.name}'s Portal</h2>
-                                <p className="text-gray-500 font-medium">Personal Dashboard & Schedule</p>
-                            </div>
-                        </div>
+                const upcomingTrainings = myTrainings.filter(t => new Date(t.date) >= TODAY);
+                const completedTrainings = myTrainings.filter(t => t.status === 'Completed');
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-indigo-600 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-                                <div className="relative z-10">
-                                    <p className="text-indigo-100 font-bold uppercase tracking-widest text-[10px] mb-2">Completion Rate</p>
-                                    <h3 className="text-4xl font-black mb-4">
-                                        {Math.round((myTrainings.filter(t => t.status === 'Completed').length / myTrainings.length)*100) || 0}%
-                                    </h3>
-                                    <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
-                                        <div className="bg-white h-full" style={{ width: `${(myTrainings.filter(t => t.status === 'Completed').length / myTrainings.length)*100}%` }}></div>
+                return (
+                    <div className="space-y-8 animate-fade-in max-w-7xl mx-auto w-full pb-12">
+                        {/* Hero Header */}
+                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                                <div>
+                                    <h1 className="text-3xl font-bold mb-2">{currentUser.name}'s Training Portal</h1>
+                                    <p className="text-indigo-100">Track your performance, schedule, and achievements</p>
+                                </div>
+                                <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl">
+                                    <div className="text-center">
+                                        <div className="text-4xl font-bold mb-1">
+                                            {Math.round((completedTrainings.length / myTrainings.length) * 100) || 0}%
+                                        </div>
+                                        <div className="text-sm text-indigo-100">Completion Rate</div>
                                     </div>
                                 </div>
-                                <AwardIcon className="absolute -bottom-6 -right-6 text-white/10 w-40 h-40" />
-                            </div>
-                            
-                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-center">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><TargetIcon /></div>
-                                    <span className="font-bold text-gray-700">Next Class</span>
-                                </div>
-                                <p className="text-lg font-bold text-gray-900 truncate">
-                                    {myTrainings.find(t => new Date(t.date) >= TODAY)?.course || 'No Classes'}
-                                </p>
-                                <p className="text-xs text-gray-400">Preparation required</p>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-center">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><CheckIcon /></div>
-                                    <span className="font-bold text-gray-700">Total Hours</span>
-                                </div>
-                                <p className="text-3xl font-black text-gray-900">{myTrainings.filter(t => t.status === 'Completed').length * 8} hrs</p>
-                                <p className="text-xs text-gray-400">Confirmed training hours</p>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
-                            <div className="p-8 border-b border-gray-50 flex justify-between items-center">
-                                <h3 className="font-black text-gray-900">Personal Schedule</h3>
-                                <button className="text-xs font-bold text-indigo-600 hover:underline">View All</button>
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-indigo-100 rounded-xl">
+                                        <TargetIcon className="w-6 h-6 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-slate-900">{upcomingTrainings.length}</p>
+                                        <p className="text-sm font-semibold text-slate-600">Upcoming</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="divide-y divide-gray-50">
-                                {myTrainings.map(t => (
-                                    <div key={t.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50 transition-all group">
-                                        <div className="flex items-center gap-6">
-                                            <div className={`w-16 h-16 flex flex-col items-center justify-center rounded-2xl border ${new Date(t.date) < TODAY ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-indigo-50 text-indigo-700 border-indigo-100'}`}>
-                                                <span className="text-[10px] font-black uppercase">{new Date(t.date).toLocaleString('default', { month: 'short' })}</span>
-                                                <span className="text-2xl font-black">{new Date(t.date).getDate()}</span>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{t.course}</h4>
-                                                <div className="flex items-center gap-3 mt-1">
-                                                    <span className="text-xs text-gray-400 flex items-center gap-1"><MapPinIcon /> {t.location}</span>
-                                                    <span className="text-xs text-gray-400 flex items-center gap-1"><TargetIcon /> {t.rh}</span>
+
+                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-emerald-100 rounded-xl">
+                                        <CheckIcon className="w-6 h-6 text-emerald-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-slate-900">{completedTrainings.length}</p>
+                                        <p className="text-sm font-semibold text-slate-600">Completed</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-amber-100 rounded-xl">
+                                        <ClockIcon className="w-6 h-6 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-slate-900">{completedTrainings.length * 8}</p>
+                                        <p className="text-sm font-semibold text-slate-600">Hours Logged</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-purple-100 rounded-xl">
+                                        <AwardIcon className="w-6 h-6 text-purple-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-slate-900">Rank A</p>
+                                        <p className="text-sm font-semibold text-slate-600">Performance</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Training Schedule */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2">
+                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div className="p-6 border-b border-slate-100">
+                                        <h3 className="text-xl font-bold text-slate-900">Training Schedule</h3>
+                                        <p className="text-slate-600">Your upcoming and completed training sessions</p>
+                                    </div>
+                                    <div className="divide-y divide-slate-100">
+                                        {myTrainings.map(t => (
+                                            <div key={t.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50/50 transition-all group">
+                                                <div className="flex items-center gap-6">
+                                                    <div className={`w-20 h-20 flex flex-col items-center justify-center rounded-2xl border-2 ${
+                                                        new Date(t.date) < TODAY 
+                                                        ? 'bg-slate-100 text-slate-400 border-slate-200' 
+                                                        : 'bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-700 border-indigo-200'
+                                                    }`}>
+                                                        <span className="text-[10px] font-black uppercase">
+                                                            {new Date(t.date).toLocaleString('default', { month: 'short' })}
+                                                        </span>
+                                                        <span className="text-2xl font-black">{new Date(t.date).getDate()}</span>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                                            {t.course}
+                                                        </h4>
+                                                        <div className="flex flex-wrap items-center gap-3 mt-2">
+                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                                <MapPinIcon className="w-3 h-3" />
+                                                                {t.location}
+                                                            </span>
+                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                                <TargetIcon className="w-3 h-3" />
+                                                                {t.rh}
+                                                            </span>
+                                                            <span className="text-xs text-slate-500">
+                                                                {t.attendees} attendees
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 md:mt-0 flex items-center gap-4">
+                                                    <StatusBadge status={t.status} />
+                                                    <button 
+                                                        onClick={() => { setSelectedTraining(t); setIsModalOpen(true); }}
+                                                        className="p-2 text-slate-400 hover:text-indigo-600 transition-colors hover-lift"
+                                                    >
+                                                        <ChevronRight className="w-5 h-5" />
+                                                    </button>
                                                 </div>
                                             </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Performance Insights */}
+                            <div className="space-y-6">
+                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                                    <h4 className="font-bold text-slate-900 mb-4">Performance Insights</h4>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="flex justify-between text-sm font-semibold text-slate-700 mb-1">
+                                                <span>Attendance Rate</span>
+                                                <span>94%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full" style={{ width: '94%' }}></div>
+                                            </div>
                                         </div>
-                                        <div className="mt-4 md:mt-0 flex items-center gap-4">
-                                            <StatusBadge status={t.status} />
-                                            <button onClick={() => { setSelectedTraining(t); setIsModalOpen(true); }} className="p-2 text-gray-400 hover:text-indigo-600 transition-colors">
-                                                <ChevronRight />
-                                            </button>
+                                        <div>
+                                            <div className="flex justify-between text-sm font-semibold text-slate-700 mb-1">
+                                                <span>Training Quality</span>
+                                                <span>96%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                <div className="bg-gradient-to-r from-blue-400 to-blue-500 h-full" style={{ width: '96%' }}></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="flex justify-between text-sm font-semibold text-slate-700 mb-1">
+                                                <span>Participant Satisfaction</span>
+                                                <span>98%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                <div className="bg-gradient-to-r from-purple-400 to-purple-500 h-full" style={{ width: '98%' }}></div>
+                                            </div>
                                         </div>
                                     </div>
-                                ))}
+                                </div>
+
+                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6">
+                                    <h4 className="font-bold mb-4">Recent Achievements</h4>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
+                                            <div className="p-2 bg-emerald-500/20 rounded-lg">
+                                                <AwardIcon className="w-5 h-5 text-emerald-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold">Top Performer</p>
+                                                <p className="text-xs text-slate-300">January 2026</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
+                                            <div className="p-2 bg-amber-500/20 rounded-lg">
+                                                <TargetIcon className="w-5 h-5 text-amber-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold">Perfect Attendance</p>
+                                                <p className="text-xs text-slate-300">Q4 2025</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
+                                            <div className="p-2 bg-blue-500/20 rounded-lg">
+                                                <TrendingIcon className="w-5 h-5 text-blue-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold">Fast Growth</p>
+                                                <p className="text-xs text-slate-300">Rising Star Award</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 );
             };
 
-            // SCHEDULE VIEW
+            // Modern ScheduleView
             const ScheduleView = () => {
-                const [q, setQ] = useState('');
-                const filtered = trainings.filter(t => t.course.toLowerCase().includes(q.toLowerCase()) || t.location.toLowerCase().includes(q.toLowerCase()));
+                const [searchQuery, setSearchQuery] = useState('');
+                const [filterStatus, setFilterStatus] = useState('all');
                 
+                const filteredTrainings = trainings.filter(t => {
+                    const matchesSearch = t.course.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                         t.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                         t.trainers.some(trainer => trainer.toLowerCase().includes(searchQuery.toLowerCase()));
+                    
+                    const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
+                    
+                    return matchesSearch && matchesStatus;
+                });
+
                 return (
-                    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col h-full animate-fade-in max-w-7xl mx-auto">
-                        <div className="p-8 bg-white border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <h2 className="text-2xl font-black text-gray-900">Training Schedule</h2>
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <SearchIcon />
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search by course..." 
-                                        className="pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all w-64"
-                                        value={q}
-                                        onChange={(e) => setQ(e.target.value)}
-                                    />
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full animate-fade-in max-w-7xl mx-auto">
+                        {/* Enhanced Header with Filters */}
+                        <div className="p-6 bg-white border-b border-slate-100">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900">Training Schedule</h2>
+                                    <p className="text-slate-600">Manage and track all training sessions</p>
                                 </div>
+                                
                                 {currentUser.isAdmin && (
                                     <button 
-                                        onClick={() => { setSelectedTraining({ id: Date.now(), date: '', endDate: '', course: COURSES[0], segment: SEGMENTS[0], zone: ZONES[0], rh: RHS[0], location: '', trainers: [], status: 'Planned', confirmed: false, attendees: 0 }); setIsModalOpen(true); }}
-                                        className="bg-indigo-600 text-white p-3 rounded-2xl shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all"
+                                        onClick={() => { 
+                                            setSelectedTraining({ 
+                                                id: Date.now(), 
+                                                date: '', 
+                                                endDate: '', 
+                                                course: COURSES[0], 
+                                                segment: SEGMENTS[0], 
+                                                zone: ZONES[0], 
+                                                rh: RHS[0], 
+                                                location: '', 
+                                                trainers: [], 
+                                                status: 'Planned', 
+                                                confirmed: false, 
+                                                attendees: 0 
+                                            }); 
+                                            setIsModalOpen(true); 
+                                        }}
+                                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover:shadow-indigo-200 hover-lift transition-all flex items-center gap-2"
                                     >
-                                        <PlusIcon />
+                                        <PlusIcon className="w-5 h-5" />
+                                        Add New Training
                                     </button>
                                 )}
                             </div>
+                            
+                            {/* Search and Filter Bar */}
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="relative flex-1">
+                                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search by course, location, or trainer..." 
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                    <select 
+                                        className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                    >
+                                        <option value="all">All Status</option>
+                                        <option value="Planned">Planned</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                    
+                                    <button className="px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+                                        Export
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Modern Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm whitespace-nowrap">
-                                <thead className="bg-slate-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50 border-b border-slate-100">
                                     <tr>
-                                        <th className="px-8 py-4">Date</th>
-                                        <th className="px-8 py-4">Course</th>
-                                        <th className="px-8 py-4">RH / Zone</th>
-                                        <th className="px-8 py-4">Location</th>
-                                        <th className="px-8 py-4">Trainers</th>
-                                        <th className="px-8 py-4">Status</th>
-                                        <th className="px-8 py-4 text-right">Action</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Course</th>
+                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Location</th>
+                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Trainers</th>
+                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {filtered.map(t => (
+                                <tbody className="divide-y divide-slate-100">
+                                    {filteredTrainings.map(t => (
                                         <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-8 py-6 font-bold text-gray-900">{new Date(t.date).toLocaleDateString('en-GB')}</td>
-                                            <td className="px-8 py-6 text-indigo-600 font-bold">{t.course}</td>
-                                            <td className="px-8 py-6 font-medium text-gray-500">{t.rh} <span className="text-[10px] opacity-40 ml-1">({t.zone})</span></td>
-                                            <td className="px-8 py-6 text-gray-500 truncate max-w-[200px]">{t.location}</td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex -space-x-2">
-                                                    {t.trainers.slice(0,3).map((tr, i) => <UserInitial key={i} name={tr} size="sm" className="ring-2 ring-white" />)}
-                                                    {t.trainers.length > 3 && <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-gray-400 ring-2 ring-white">+{t.trainers.length-3}</div>}
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-slate-900">
+                                                        {new Date(t.date).toLocaleDateString('en-GB')}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500">
+                                                        {t.rh} • {t.zone}
+                                                    </span>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-6"><StatusBadge status={t.status} /></td>
-                                            <td className="px-8 py-6 text-right">
-                                                <button onClick={() => { setSelectedTraining(t); setIsModalOpen(true); }} className="text-indigo-600 font-bold text-xs uppercase tracking-widest hover:underline">Edit</button>
+                                            <td className="px-6 py-4">
+                                                <div className="font-semibold text-slate-900">{t.course}</div>
+                                                <div className="text-xs text-slate-500">{t.segment}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-slate-700">
+                                                    <MapPinIcon className="w-4 h-4 text-slate-400" />
+                                                    {t.location}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex -space-x-2">
+                                                    {t.trainers.slice(0, 3).map((tr, i) => (
+                                                        <UserInitial key={i} name={tr} size="sm" className="ring-2 ring-white" />
+                                                    ))}
+                                                    {t.trainers.length > 3 && (
+                                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 ring-2 ring-white">
+                                                            +{t.trainers.length - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <StatusBadge status={t.status} />
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button 
+                                                    onClick={() => { setSelectedTraining(t); setIsModalOpen(true); }}
+                                                    className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm hover-lift transition-all px-4 py-2 rounded-lg hover:bg-indigo-50"
+                                                >
+                                                    View Details →
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -513,7 +1227,7 @@
                 );
             };
 
-            // MODAL COMPONENT
+            // Modern Modal Component
             const Modal = () => {
                 if (!isModalOpen || !selectedTraining) return null;
                 const [form, setForm] = useState(selectedTraining);
@@ -534,77 +1248,163 @@
                 };
 
                 return (
-                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-fade-in">
-                        <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
-                            <div className="p-10 border-b border-gray-50 flex justify-between items-center">
-                                <h3 className="text-2xl font-black text-gray-900">Training Details</h3>
-                                <button onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all"><XIcon /></button>
+                    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+                        <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
+                            {/* Modal Header */}
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-slate-900">Training Details</h3>
+                                    <p className="text-slate-600">Edit training information and assignments</p>
+                                </div>
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                                >
+                                    <XIcon className="w-6 h-6" />
+                                </button>
                             </div>
                             
-                            <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Course Name</label>
-                                    <select disabled={!currentUser.isAdmin} className="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none" value={form.course} onChange={e => setForm({...form, course: e.target.value})}>
-                                        {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
+                            {/* Modal Body */}
+                            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+                                {/* Left Column */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Course Name</label>
+                                        <select 
+                                            disabled={!currentUser.isAdmin}
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            value={form.course}
+                                            onChange={e => setForm({...form, course: e.target.value})}
+                                        >
+                                            {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Training Date</label>
+                                        <input 
+                                            disabled={!currentUser.isAdmin}
+                                            type="date" 
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-50"
+                                            value={form.date}
+                                            onChange={e => setForm({...form, date: e.target.value})}
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Location</label>
+                                        <input 
+                                            disabled={!currentUser.isAdmin}
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-50"
+                                            value={form.location}
+                                            onChange={e => setForm({...form, location: e.target.value})}
+                                            placeholder="Enter training location"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Region (RH)</label>
-                                    <select disabled={!currentUser.isAdmin} className="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none" value={form.rh} onChange={e => setForm({...form, rh: e.target.value})}>
-                                        {RHS.map(rh => <option key={rh} value={rh}>{rh}</option>)}
-                                    </select>
+                                
+                                {/* Right Column */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Region (RH)</label>
+                                        <select 
+                                            disabled={!currentUser.isAdmin}
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                            value={form.rh}
+                                            onChange={e => setForm({...form, rh: e.target.value})}
+                                        >
+                                            {RHS.map(rh => <option key={rh} value={rh}>{rh}</option>)}
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+                                        <select 
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                            value={form.status}
+                                            onChange={e => {
+                                                if (e.target.value === 'Completed' && !isPast) {
+                                                    alert('Cannot mark as completed before training date!');
+                                                    return;
+                                                }
+                                                setForm({...form, status: e.target.value});
+                                            }}
+                                        >
+                                            <option value="Planned">Planned</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Number of Attendees</label>
+                                        <input 
+                                            type="number"
+                                            min="0"
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                            value={form.attendees}
+                                            onChange={e => setForm({...form, attendees: parseInt(e.target.value) || 0})}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Training Date</label>
-                                    <input disabled={!currentUser.isAdmin} type="date" className="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none" value={form.date} onChange={e => setForm({...form, date: e.target.value})} />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</label>
-                                    <select 
-                                        className="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none" 
-                                        value={form.status} 
-                                        onChange={e => {
-                                            if (e.target.value === 'Completed' && !isPast) {
-                                                alert('Cannot complete before training date!');
-                                                return;
-                                            }
-                                            setForm({...form, status: e.target.value});
-                                        }}
-                                    >
-                                        <option value="Planned">Planned</option>
-                                        <option value="Confirmed">Confirmed</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Cancelled">Cancelled</option>
-                                    </select>
-                                </div>
-                                <div className="md:col-span-2 space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Location / Hotel</label>
-                                    <input disabled={!currentUser.isAdmin} className="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none" value={form.location} onChange={e => setForm({...form, location: e.target.value})} />
-                                </div>
-                                <div className="md:col-span-2 space-y-3">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Assign Trainers</label>
-                                    <div className="flex flex-wrap gap-2">
+                                
+                                {/* Full Width - Trainers Assignment */}
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-4">Assign Trainers</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                                         {INITIAL_USERS.map(u => (
                                             <button 
                                                 key={u.id}
                                                 disabled={!currentUser.isAdmin}
                                                 onClick={() => {
                                                     const has = form.trainers.includes(u.name);
-                                                    setForm({...form, trainers: has ? form.trainers.filter(t => t !== u.name) : [...form.trainers, u.name]});
+                                                    setForm({
+                                                        ...form,
+                                                        trainers: has 
+                                                            ? form.trainers.filter(t => t !== u.name)
+                                                            : [...form.trainers, u.name]
+                                                    });
                                                 }}
-                                                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${form.trainers.includes(u.name) ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100' : 'bg-white text-gray-400 border-gray-100'}`}
+                                                className={`p-4 rounded-xl border-2 transition-all hover-lift ${
+                                                    form.trainers.includes(u.name)
+                                                    ? 'border-indigo-500 bg-indigo-50'
+                                                    : 'border-slate-200 bg-white hover:border-slate-300'
+                                                } ${!currentUser.isAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
-                                                {u.name}
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <UserInitial name={u.name} size="sm" />
+                                                    <div className="text-center">
+                                                        <div className="text-xs font-semibold text-slate-700 truncate">
+                                                            {u.name}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500">
+                                                            {u.isAdmin ? 'Admin' : 'Trainer'}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-10 bg-slate-50 border-t border-gray-100 flex justify-end gap-4">
-                                <button onClick={() => setIsModalOpen(false)} className="px-8 py-4 text-sm font-bold text-gray-400 hover:text-gray-600">Cancel</button>
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-6 py-3 text-slate-600 hover:text-slate-800 font-semibold hover:bg-white rounded-xl transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                
                                 {currentUser.isAdmin && (
-                                    <button onClick={handleSave} className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">Save Changes</button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover-lift transition-all"
+                                    >
+                                        Save Changes
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -612,62 +1412,121 @@
                 );
             };
 
-            // NAVIGATION ITEMS
+            // Navigation Items with improved contrast
             const navItems = [
                 { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
                 { id: 'schedule', label: 'Schedule', icon: <ListIcon /> },
                 { id: 'calendar', label: 'Calendar', icon: <CalendarIcon /> },
                 { id: 'trainerView', label: 'My Portal', icon: <UserIcon /> },
-                { id: 'reports', label: 'Reports', icon: <ChartIcon /> },
+                { id: 'reports', label: 'Analytics', icon: <ChartIcon /> },
             ];
 
-            // MAIN RENDER
             return (
-                <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
-                    {/* Sidebar Desktop */}
-                    <aside className="hidden lg:flex w-72 flex-col bg-slate-900 text-white p-8">
-                        <div className="flex items-center gap-4 mb-12">
-                            <div className="w-10 h-10 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30"><HomeIcon /></div>
-                            <h1 className="text-lg font-black tracking-tight leading-tight">2026 TRAINING</h1>
+                <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 font-sans text-slate-900 overflow-hidden">
+                    {/* Modern Sidebar */}
+                    <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-72 flex-col bg-gradient-to-b from-slate-900 to-slate-800 text-white transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:flex`}>
+                        <div className="p-6 border-b border-white/10">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <HomeIcon className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <h1 className="text-lg font-bold">Training Portal</h1>
+                                    <p className="text-xs text-slate-300">2026 Edition</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl mb-6">
+                                <UserInitial name={currentUser.name} size="sm" />
+                                <div className="flex-1">
+                                    <p className="text-sm font-semibold">{currentUser.name}</p>
+                                    <p className="text-xs text-slate-300">{currentUser.role}</p>
+                                </div>
+                            </div>
                         </div>
-                        <nav className="flex-1 space-y-2">
+                        
+                        <nav className="flex-1 p-4 space-y-1">
                             {navItems.map(item => (
                                 <button
                                     key={item.id}
-                                    onClick={() => setView(item.id)}
-                                    className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold transition-all ${view === item.id ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                                    onClick={() => {
+                                        setView(item.id);
+                                        setIsSidebarOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                                        view === item.id
+                                        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+                                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                                    }`}
                                 >
-                                    {item.icon} {item.label}
+                                    {item.icon}
+                                    {item.label}
                                 </button>
                             ))}
                         </nav>
-                        <div className="mt-auto pt-8 border-t border-white/5">
+                        
+                        <div className="p-4 border-t border-white/10">
                             <button 
                                 onClick={() => { setIsAuthenticated(false); setView('home'); }}
-                                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold text-slate-500 hover:text-rose-400 transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all"
                             >
-                                <LogoutIcon /> Logout
+                                <LogoutIcon />
+                                Logout
                             </button>
                         </div>
                     </aside>
 
-                    {/* Main Container */}
-                    <div className="flex-1 flex flex-col min-w-0">
-                        <header className="lg:hidden h-16 bg-white border-b border-gray-100 px-6 flex items-center justify-between">
-                            <h1 className="font-black text-indigo-600">2026 TRAINING</h1>
-                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}><MenuIcon /></button>
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
+                        {/* Mobile Header */}
+                        <header className="lg:hidden h-16 bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30">
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                                    <MenuIcon className="w-6 h-6 text-slate-700" />
+                                </button>
+                                <h1 className="font-bold text-slate-900">Training Portal</h1>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <BellIcon className="w-5 h-5 text-slate-600" />
+                                <UserInitial name={currentUser.name} size="sm" />
+                            </div>
                         </header>
                         
-                        <main className="flex-1 overflow-y-auto p-6 md:p-10 bg-white">
+                        {/* Main Content Area */}
+                        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
                             {view === 'dashboard' && <DashboardView />}
                             {view === 'schedule' && <ScheduleView />}
                             {view === 'calendar' && <CalendarView />}
                             {view === 'trainerView' && <TrainerView />}
-                            {view === 'reports' && <div className="text-center py-10"><p className="text-gray-500">Reports view coming soon...</p></div>}
+                            {view === 'reports' && (
+                                <div className="max-w-7xl mx-auto">
+                                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+                                        <h2 className="text-2xl font-bold text-slate-900 mb-2">Analytics & Reports</h2>
+                                        <p className="text-slate-600 mb-8">Comprehensive analytics dashboard coming soon...</p>
+                                        <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center">
+                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                                <ChartIcon className="w-8 h-8 text-indigo-600" />
+                                            </div>
+                                            <h3 className="text-xl font-bold text-slate-900 mb-2">Advanced Analytics</h3>
+                                            <p className="text-slate-600 max-w-md mx-auto">
+                                                Detailed reports, performance metrics, and data visualizations will be available here in the next update.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </main>
                     </div>
 
                     <Modal />
+
+                    {/* Background Overlay for Mobile Sidebar */}
+                    {isSidebarOpen && (
+                        <div 
+                            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden"
+                            onClick={() => setIsSidebarOpen(false)}
+                        ></div>
+                    )}
                 </div>
             );
         }

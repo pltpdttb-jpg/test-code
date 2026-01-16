@@ -829,57 +829,57 @@
 
         // --- 6. EDGE FUNCTION CALL ---
         async function callEdgeFunction(data) {
-            try {
-                const response = await fetch(SUPABASE_EDGE_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify(data)
-                });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000); // 20s
 
-                if (!response.ok) throw new Error(`Server error: ${response.status}`);
-                const json = await response.json();
-                
-                // Validate structure
-                if (json.risks && Array.isArray(json.risks) && json.recommendations) {
-                    return json;
-                } else {
-                    throw new Error("Invalid response format");
-                }
-            } catch (e) {
-                throw e;
-            }
+    try {
+        const response = await fetch(SUPABASE_EDGE_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify(data),
+            signal: controller.signal
+        });
+
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        const json = await response.json();
+
+        if (!json || !json.risks || !json.recommendations) {
+            throw new Error("Invalid AI response");
         }
+
+        return json;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
 
         function mapAIResultToLegacyFormat(aiResult, d) {
-            const levelMap = { 'Low': 20, 'Medium': 50, 'High': 80, 'Critical': 95 };
-            const riskMap = {
-                'Income Protection': 'Income Protection',
-                'Health Coverage': 'Health Coverage',
-                'Retirement Wealth': 'Retirement Wealth',
-                'Debt Management': 'Debt Management',
-                'Liquidity': 'Liquidity'
-            };
+    const levelMap = { 'Low': 20, 'Medium': 50, 'High': 80, 'Critical': 95 };
+    const expectedTypes = [
+        'Income Protection',
+        'Health Coverage',
+        'Retirement Wealth',
+        'Debt Management',
+        'Liquidity'
+    ];
 
-            let risks = [];
-            Object.keys(riskMap).forEach(key => {
-                const found = aiResult.risks.find(r => r.type === key);
-                if (found) {
-                    risks.push({
-                        name: key,
-                        score: levelMap[found.level] || 50,
-                        desc: found.reason
-                    });
-                } else {
-                    risks.push({ name: key, score: 20, desc: 'Not evaluated' });
-                }
-            });
+    let risks = expectedTypes.map(type => {
+        const found = aiResult.risks?.find(r => r.type === type);
+        return {
+            name: type,
+            score: levelMap[found?.level] ?? 30,
+            desc: found?.reason ?? 'ไม่มีข้อมูลจาก AI'
+        };
+    });
 
-            appState.risks = risks;
-            appState.aiStrategies = aiResult.recommendations;
-        }
+    appState.risks = risks;
+    appState.aiStrategies = Array.isArray(aiResult.recommendations)
+        ? aiResult.recommendations
+        : null;
+}
 
         // --- 7. FALLBACK LOGIC ---
         function performLegacyAnalysis(d) {
@@ -1061,9 +1061,12 @@
 
             try {
                 // Wait for repaint
-                await new Promise(r => setTimeout(r, 800));
-                
-                await html2pdf().set(opt).from(element).save();
+                await document.fonts.ready;
+await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+await document.fonts.ready;
+await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+await html2pdf().set(opt).from(element).save();
                 
                 // Restore
                 chartCanvas.style.height = originalHeight;

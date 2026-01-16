@@ -1,1538 +1,1083 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Portal 2026 | Modern Dashboard</title>
-    <!-- Tailwind CSS with Modern Design System -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-    <!-- Inter Font (Modern) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบช่วยวิเคราะห์ข้อมูลลูกค้า (Customer Analysis Assistant)</title>
+    
+    <!-- Fonts: Prompt for Thai support -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#f0f9ff', 100:'#e0f2fe', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1', 900:'#0c4a6e' },
+                        accent: { 500:'#06b6d4', 600:'#0891b2' }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-light: #EEF2FF;
-            --secondary: #10B981;
-            --accent: #F59E0B;
-            --surface: #FFFFFF;
-            --background: #F8FAFC;
-            --text-primary: #1E293B;
-            --text-secondary: #64748B;
-            --text-tertiary: #94A3B8;
-            --border: #E2E8F0;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --radius-sm: 0.375rem;
-            --radius: 0.75rem;
-            --radius-lg: 1rem;
-            --radius-xl: 1.5rem;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: var(--background);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        /* Modern Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #F1F5F9;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #CBD5E1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94A3B8;
-        }
-
+        body { background-color: #f8fafc; -webkit-tap-highlight-color: transparent; font-family: 'Prompt', sans-serif; }
+        
         /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
+        /* Form Styling */
+        .inp-label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.35rem; }
+        .inp-field { 
+            width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; 
+            background: #fff; transition: all 0.2s; font-size: 0.95rem; color: #1e293b;
+            appearance: none;
         }
-        .animate-slide-in {
-            animation: slideIn 0.5s ease-out forwards;
+        .inp-field:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
+        .inp-field.error { border-color: #ef4444; background-color: #fef2f2; }
+        .error-text { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: none; }
+        
+        select.inp-field {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
         }
-        .animate-pulse-slow {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
+        option:checked { background-color: #e0f2fe; color: #0284c7; font-weight: bold; }
 
-        /* Glassmorphism Effects */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .credit-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(255,255,255,0.95); border-top: 1px solid #e2e8f0;
+            text-align: center; padding: 0.5rem; z-index: 50;
+            font-size: 0.7rem; color: #64748b; font-weight: 500;
         }
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Gradient Backgrounds */
-        .gradient-primary {
-            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
-        }
-        .gradient-success {
-            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
-        }
-        .gradient-warning {
-            background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-        }
-        .gradient-info {
-            background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-        }
-
-        /* Custom Classes */
-        .text-gradient {
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hover-lift {
-            transition: all 0.3s ease;
-        }
-        .hover-lift:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-        }
-        .highlight-shadow {
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-        .neumorphic {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff;
-        }
-
-        /* Smooth Transitions */
-        .transition-all-smooth {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Print/PDF Optimization */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; -webkit-print-color-adjust: exact; }
+            * { font-family: 'Prompt', sans-serif !important; }
+            .shadow-sm, .shadow-lg { box-shadow: none !important; border: 1px solid #ddd; }
+            /* Prevent rendering artifacts in PDF */
+            .text-transparent { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
-    <div id="root"></div>
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden bg-slate-50">
 
-    <script type="text/babel">
-        const { useState, useMemo, useEffect, useRef } = React;
-
-        // Modern Icon Components with better contrast
-        const CalendarIcon = ({ className = "w-5 h-5" }) => 
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>;
-
-        const DashboardIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="9"/>
-                <rect x="14" y="3" width="7" height="5"/>
-                <rect x="14" y="12" width="7" height="9"/>
-                <rect x="3" y="16" width="7" height="5"/>
-            </svg>;
-
-        const ListIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-                <line x1="3" y1="6" x2="3" y2="6"/><line x1="3" y1="12" x2="3" y2="12"/><line x1="3" y1="18" x2="3" y2="18"/>
-            </svg>;
-
-        const UserIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>;
-
-        const ChartIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>;
-
-        const LogoutIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>;
-
-        const SearchIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>;
-
-        const PlusIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>;
-
-        const CheckIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>;
-
-        const ClockIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>;
-
-        const ChevronLeft = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15 18 9 12 15 6"/>
-            </svg>;
-
-        const ChevronRight = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6"/>
-            </svg>;
-
-        const MapPinIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-            </svg>;
-
-        const MenuIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>;
-
-        const XIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>;
-
-        const TargetIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-            </svg>;
-
-        const TrendingIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-            </svg>;
-
-        const AwardIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-            </svg>;
-
-        const LockIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>;
-
-        const HomeIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>;
-
-        const SettingsIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>;
-
-        const BellIcon = ({ className = "w-5 h-5" }) =>
-            <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>;
-
-        // INITIAL DATA
-        const INITIAL_USERS = [
-            { id: 'u1', name: 'Pachara', role: 'Main Trainer (Admin)', isAdmin: true },
-            { id: 'u2', name: 'Yannapat', role: 'Main Trainer (Admin)', isAdmin: true },
-            { id: 'u3', name: 'Thanayot', role: 'Main Trainer (Admin)', isAdmin: true },
-            { id: 'u4', name: 'Ananya', role: 'Main Trainer (Admin)', isAdmin: true },
-            { id: 'u5', name: 'Natkanit', role: 'Trainer', isAdmin: false },
-            { id: 'u6', name: 'Patchareeya', role: 'Trainer', isAdmin: false },
-        ];
-
-        const INITIAL_TRAININGS = [
-            { id: 1, date: '2026-01-12', endDate: '2026-01-12', course: 'KASH school 2', segment: 'High & Sniper', zone: 'จตุจักร', rh: 'RH 1', location: 'Jubilee Prestige รัชดา', trainers: ['Pachara', 'Natkanit'], status: 'Completed', confirmed: true, attendees: 25 },
-            { id: 2, date: '2026-01-16', endDate: '2026-01-16', course: 'KASH school 2', segment: 'High & Sniper', zone: 'ธนบุรี', rh: 'RH 1', location: 'Jubilee Prestige รัชดา', trainers: ['Pachara', 'Natkanit'], status: 'Completed', confirmed: true, attendees: 22 },
-            { id: 3, date: '2026-02-02', endDate: '2026-02-02', course: 'KASH school 2', segment: 'High & Sniper', zone: 'สุขุมวิท', rh: 'RH 1', location: 'Jubilee Prestige รัชดา', trainers: ['Natkanit', 'Patchareeya'], status: 'Completed', confirmed: true, attendees: 24 },
-            { id: 4, date: '2026-02-09', endDate: '2026-02-09', course: 'Mama 1', segment: 'Low & Medium', zone: '-', rh: '-', location: 'Jubilee Prestige รัชดา', trainers: ['Pachara', 'Saowanee'], status: 'Completed', confirmed: true, attendees: 18 },
-            { id: 5, date: '2026-02-16', endDate: '2026-02-16', course: 'KASH school 1', segment: 'Low & Medium', zone: 'ชลบุรี', rh: 'RH 2', location: 'โรงแรมรัตนชล', trainers: ['Pachara', 'Saowanee'], status: 'Planned', confirmed: false, attendees: 0 },
-        ];
-
-        const COURSE_GROUPS = [
-            { name: 'KASH School', courses: ['KASH school 1', 'KASH school 2'], color: 'bg-gradient-to-r from-indigo-500 to-purple-600', lightColor: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100' },
-            { name: 'Ramen', courses: ['Ramen 1', 'Ramen 2'], color: 'bg-gradient-to-r from-rose-500 to-pink-600', lightColor: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100' },
-            { name: 'Mama', courses: ['Mama 1', 'Mama 2'], color: 'bg-gradient-to-r from-amber-500 to-orange-500', lightColor: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' }
-        ];
-
-        const COURSES = ['KASH school 1', 'KASH school 2', 'Ramen 1', 'Ramen 2', 'Mama 1', 'Mama 2'];
-        const RHS = ['RH 1', 'RH 2', 'RH 3', 'RH 4', 'RH 5'];
-        const SEGMENTS = ['High & Sniper', 'Low & Medium'];
-        const ZONES = ['จตุจักร', 'ธนบุรี', 'บางกะปิ', 'สาทร', 'สุขุมวิท', 'บางนา', 'นนทบุรี', 'ชลบุรี'];
-
-        // UTILS
-        const getPasscode = (name) => {
-            return `ttb${name.substring(0, 3).toLowerCase()}`;
-        };
-
-        // COMPONENTS
-        const StatusBadge = ({ status }) => {
-            const styles = {
-                Planned: 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold',
-                Confirmed: 'bg-amber-50 text-amber-700 border border-amber-200 font-semibold',
-                Completed: 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold',
-                Cancelled: 'bg-rose-50 text-rose-700 border border-rose-200 font-semibold',
-            };
-            return (
-                <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
-                    {status}
-                </span>
-            );
-        };
-
-        const UserInitial = ({ name, size = "md", className = "" }) => {
-            const initials = name ? name.charAt(0).toUpperCase() : '?';
-            const sizeClasses = {
-                sm: "w-10 h-10 text-sm",
-                md: "w-12 h-12 text-base",
-                lg: "w-16 h-16 text-xl",
-                xl: "w-24 h-24 text-3xl"
-            };
+    <!-- VIEW 0: SPLASH SCREEN & PASSCODE -->
+    <section id="view-splash" class="absolute inset-0 z-50 bg-gradient-to-br from-brand-700 to-brand-500 flex flex-col items-center justify-center text-white p-6">
+        <div class="text-center slide-up w-full max-w-md">
+            <div class="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl ring-4 ring-white/10">
+                <i class="fa-solid fa-chart-pie text-4xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-2 tracking-tight">Welcome</h1>
+            <p class="text-lg opacity-90 mb-8 font-light">Customer Analysis Assistant System</p>
             
-            // Modern gradient colors based on name
-            const gradients = [
-                'bg-gradient-to-br from-indigo-500 to-purple-600',
-                'bg-gradient-to-br from-emerald-500 to-teal-600',
-                'bg-gradient-to-br from-rose-500 to-pink-600',
-                'bg-gradient-to-br from-amber-500 to-orange-500',
-                'bg-gradient-to-br from-blue-500 to-cyan-600'
-            ];
-            
-            const bgGradient = gradients[name ? name.charCodeAt(0) % gradients.length : 0];
+            <div id="loading-spinner" class="animate-pulse-slow mb-4 flex flex-col items-center">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i> 
+                <span class="text-sm font-medium opacity-80">กำลังโหลดระบบ...</span>
+            </div>
 
-            return (
-                <div className={`${sizeClasses[size]} ${bgGradient} rounded-2xl flex items-center justify-center text-white font-bold shadow-lg hover-lift transition-all duration-300 ${className}`}>
-                    {initials}
+            <!-- Passcode Area -->
+            <div id="passcode-area" class="hidden fade-in w-full px-8">
+                <p class="mb-3 text-sm font-semibold opacity-90">กรุณากรอก Passcode</p>
+                <input type="password" id="passcode-input" class="w-full px-4 py-3 rounded-xl text-slate-800 text-center text-xl tracking-widest font-bold shadow-lg focus:outline-none focus:ring-4 focus:ring-white/30 mb-4 placeholder:text-slate-300 placeholder:font-normal placeholder:tracking-normal" placeholder="" maxlength="10">
+                <button onclick="checkPasscode()" class="w-full bg-white text-brand-600 font-bold py-3.5 rounded-xl shadow-lg hover:bg-brand-50 transition-transform active:scale-95">เข้าสู่ระบบ</button>
+                <p class="mt-8 text-[10px] opacity-60">Powered by PRU Academy [ttb training team]</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- HEADER -->
+    <header id="main-header" class="hidden bg-white shadow-sm z-40 shrink-0 border-b border-slate-100 sticky top-0">
+        <div class="px-4 py-3 flex justify-between items-center max-w-6xl mx-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center shadow-md shadow-brand-500/20 text-white">
+                    <i class="fa-solid fa-chart-simple text-sm"></i>
                 </div>
-            );
+                <div>
+                    <h1 class="font-bold text-base leading-tight text-slate-800">CAAS AI</h1>
+                    <p class="text-[10px] text-slate-500 font-medium">Professional Assistant</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="user-display" class="hidden md:flex flex-col items-end mr-2 text-right">
+                    <span class="text-xs font-bold text-slate-700" id="header-emp-job">Guest</span>
+                    <span class="text-[10px] text-slate-400" id="header-emp-zone">-</span>
+                </div>
+                <button onclick="resetSystem()" class="text-slate-400 hover:text-red-500 transition-colors px-2 py-1" title="Logout">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main id="main-container" class="flex-1 overflow-y-auto relative pb-12 hidden scroll-smooth">
+        
+        <!-- VIEW 1: EMP LOGIN -->
+        <section id="view-login" class="min-h-full flex flex-col items-center justify-center p-6 slide-up">
+            <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">ระบุข้อมูลพนักงาน</h2>
+                    <p class="text-xs text-slate-500 mt-1">เพื่อบันทึกสถิติการใช้งานระบบ</p>
+                </div>
+                
+                <form onsubmit="handleEmpLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="inp-label">รหัสพนักงาน (ตัวเลขเท่านั้น)</label>
+                        <input type="text" id="empId" class="inp-field" oninput="validateEmpId(this)" placeholder="ระบุรหัสพนักงาน" required>
+                        <div class="error-text">กรุณากรอกเฉพาะตัวเลข</div>
+                    </div>
+                    <div>
+                        <label class="inp-label">ตำแหน่งงาน</label>
+                        <select id="empJob" class="inp-field" required>
+                            <option value="">เลือกตำแหน่ง</option>
+                            <option value="CFSA">CFSA</option>
+                            <option value="CISA">CISA</option>
+                            <option value="BM">BM</option>
+                            <option value="Wealth">Wealth</option>
+                            <option value="PB">PB</option>
+                            <option value="IS IA">IS IA</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="inp-label">RH สังกัด</label>
+                            <select id="empRH" class="inp-field" onchange="updateZones()" required>
+                                <option value="">เลือก RH</option>
+                                <option value="RH1">RH1</option><option value="RH2">RH2</option>
+                                <option value="RH3">RH3</option><option value="RH4">RH4</option><option value="RH5">RH5</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="inp-label">Zone</label>
+                            <select id="empZone" class="inp-field" disabled required>
+                                <option value="">รอเลือก RH</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/20 transition-all mt-2">
+                        เข้าสู่เมนูหลัก <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW 2: CUSTOMER INPUT -->
+        <section id="view-input" class="hidden max-w-4xl mx-auto p-4 pb-24 fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-brand-500 rounded-full"></span> ข้อมูลลูกค้า
+                </h2>
+                <button type="button" onclick="clearForm()" class="text-xs text-red-500 font-medium hover:bg-red-50 px-3 py-1.5 rounded-lg transition border border-red-100">
+                    <i class="fa-solid fa-rotate-left"></i> ล้างค่า
+                </button>
+            </div>
+
+            <form id="form-customer" class="space-y-5">
+                
+                <!-- 1. Profile -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2 text-sm font-bold text-slate-700">
+                        <i class="fa-solid fa-id-card text-brand-500"></i> ข้อมูลส่วนตัว & อาชีพ
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="inp-label">ชื่อ-นามสกุล (สมมติ)</label>
+                            <input type="text" id="custName" class="inp-field" placeholder="เช่น คุณเอ" required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="inp-label">อายุ (ปี)</label>
+                                <input type="number" id="custAge" class="inp-field" oninput="validateNumber(this)" placeholder="เช่น 35" required>
+                                <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
+                            </div>
+                            <div>
+                                <label class="inp-label">เพศ</label>
+                                <select id="custGender" class="inp-field">
+                                    <option value="Male">ชาย</option><option value="Female">หญิง</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="inp-label">อาชีพ</label>
+                            <select id="custJob" class="inp-field" onchange="toggleBizSection()">
+                                <option value="พนักงานบริษัท">พนักงานบริษัท</option>
+                                <option value="ข้าราชการ">ข้าราชการ/รัฐวิสาหกิจ</option>
+                                <option value="เจ้าของกิจการ">เจ้าของกิจการ</option>
+                                <option value="อาชีพอิสระ">อาชีพอิสระ/ฟรีแลนซ์</option>
+                                <option value="วิชาชีพเฉพาะ">วิชาชีพเฉพาะ (แพทย์/วิศวกร)</option>
+                                <option value="เกษตรกร">เกษตรกร</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="inp-label">รายได้ต่อเดือน (บาท)</label>
+                            <input type="number" id="custIncome" class="inp-field" oninput="validateNumber(this); calcYearly()" placeholder="0" required>
+                            <div class="text-xs text-brand-600 font-semibold mt-1 bg-brand-50 inline-block px-2 py-1 rounded">
+                                รายได้ต่อปีประมาณ: <span id="displayYearly">0</span> บาท
+                            </div>
+                            <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
+                        </div>
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="inp-label">สวัสดิการที่มี</label>
+                                <select id="custWelfare" class="inp-field">
+                                    <option value="ไม่มี">ไม่มี/สิทธิพื้นฐาน</option>
+                                    <option value="มี - วงเงินสูง">มี - วงเงินสูง (High)</option>
+                                    <option value="มี - วงเงินกลาง">มี - วงเงินกลาง (Medium)</option>
+                                    <option value="มี - วงเงินต่ำ">มี - วงเงินต่ำ (Low)</option>
+                                    <option value="มี - ทุนประกันต่อปี">มี - จำกัดงบต่อปี</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="inp-label">วงเงินสวัสดิการ (บาท)</label>
+                                <input type="number" id="welfareAmount" class="inp-field" oninput="validateNumber(this)" placeholder="ระบุหากทราบ">
+                                <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.1 Business Specific (Conditional) -->
+                <div id="sec-biz" class="hidden bg-orange-50 rounded-xl shadow-sm border border-orange-200 overflow-hidden">
+                    <div class="px-5 py-3 border-b border-orange-100 flex items-center gap-2 text-sm font-bold text-orange-800">
+                        <i class="fa-solid fa-briefcase"></i> ข้อมูลธุรกิจ (เฉพาะเจ้าของกิจการ)
+                    </div>
+                    <div class="p-5 grid grid-cols-2 gap-4">
+                        <div class="col-span-2"><label class="inp-label">ประเภทธุรกิจ</label><input type="text" id="bizType" class="inp-field" placeholder="ระบุประเภทธุรกิจ"></div>
+                        <div><label class="inp-label">ทุนจดทะเบียน (บาท)</label><input type="number" id="bizCapital" class="inp-field" oninput="validateNumber(this)"></div>
+                        <div><label class="inp-label">กำไรต่อปี (ประมาณการ)</label><input type="number" id="bizProfit" class="inp-field" oninput="validateNumber(this)"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Family -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2 text-sm font-bold text-slate-700">
+                        <i class="fa-solid fa-users text-brand-500"></i> ข้อมูลครอบครัว
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="inp-label">สถานภาพ</label>
+                            <select id="famStatus" class="inp-field">
+                                <option value="โสด">โสด</option>
+                                <option value="สมรส">สมรส</option>
+                                <option value="หย่าร้าง">หย่าร้าง/หม้าย</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="inp-label">บทบาทรายได้ในครอบครัว</label>
+                            <select id="incomeRole" class="inp-field">
+                                <option value="main">เป็นเสาหลัก (หารายได้หลัก)</option>
+                                <option value="co">หารายได้ร่วมกัน</option>
+                                <option value="dependent">ไม่มีรายได้/เป็นผู้พึ่งพา</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="inp-label">จำนวนบุตร</label>
+                            <input type="number" id="childCount" class="inp-field" oninput="validateNumber(this); generateChildRows()" placeholder="0">
+                            <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
+                            <div id="child-details-container" class="mt-3 space-y-3"></div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="inp-label">บุคคลที่ต้องดูแล (พ่อแม่/คนพิการ)</label>
+                            <div class="flex gap-4 mt-2">
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-2 rounded border border-slate-200 w-full justify-center has-checked:bg-brand-50 has-checked:border-brand-300 transition-colors">
+                                    <input type="radio" name="hasDependent" value="no" checked class="accent-brand-600 w-4 h-4"> <span>ไม่มี</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-2 rounded border border-slate-200 w-full justify-center has-checked:bg-brand-50 has-checked:border-brand-300 transition-colors">
+                                    <input type="radio" name="hasDependent" value="yes" class="accent-brand-600 w-4 h-4"> <span>มี</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Financial & Debt -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2 text-sm font-bold text-slate-700">
+                        <i class="fa-solid fa-coins text-brand-500"></i> การเงิน & หนี้สิน
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <label class="inp-label text-brand-600 border-b border-slate-200 pb-1 mb-2">เงินออม (Savings)</label>
+                                <div>
+                                    <label class="inp-label text-xs">เงินฝากออมทรัพย์</label>
+                                    <input type="number" id="finSavingCASA" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
+                                </div>
+                                <div>
+                                    <label class="inp-label text-xs">เงินฝากประจำ</label>
+                                    <input type="number" id="finSavingFixed" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
+                                </div>
+                            </div>
+                            <div class="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <label class="inp-label text-brand-600 border-b border-slate-200 pb-1 mb-2">เงินลงทุน (Investments)</label>
+                                <div>
+                                    <label class="inp-label text-xs">หุ้น (Stocks)</label>
+                                    <input type="number" id="finInvestStock" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
+                                </div>
+                                <div>
+                                    <label class="inp-label text-xs">กองทุนรวม (Funds)</label>
+                                    <input type="number" id="finInvestFund" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-dashed border-slate-200 pt-4">
+                            <label class="inp-label text-red-500 mb-3 block flex items-center gap-2"><i class="fa-solid fa-receipt"></i> รายละเอียดภาระหนี้สินคงค้าง</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div><label class="inp-label text-xs">หนี้บ้าน</label><input type="number" id="debtHome" class="inp-field text-sm" placeholder="ยอดคงเหลือ" oninput="validateNumber(this)"></div>
+                                <div><label class="inp-label text-xs">หนี้รถยนต์</label><input type="number" id="debtCar" class="inp-field text-sm" placeholder="ยอดคงเหลือ" oninput="validateNumber(this)"></div>
+                                <div><label class="inp-label text-xs">บัตรเครดิต/สินเชื่อบุคคล</label><input type="number" id="debtPersonal" class="inp-field text-sm" placeholder="ยอดคงเหลือ" oninput="validateNumber(this)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Insurance Portfolio -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <i class="fa-solid fa-shield-heart text-brand-500"></i> ประกันที่มีอยู่
+                        </div>
+                        <button type="button" onclick="addPolicyRow()" class="text-xs bg-white text-brand-600 px-3 py-1.5 rounded shadow-sm hover:bg-brand-50 font-bold border border-brand-100 transition-colors">
+                            <i class="fa-solid fa-plus"></i> เพิ่มกรมธรรม์
+                        </button>
+                    </div>
+                    <div class="p-5">
+                        <div id="policy-container" class="space-y-3">
+                            <!-- Dynamic Rows -->
+                        </div>
+                        <div id="empty-policy-msg" class="text-center text-slate-400 text-sm py-6 border-2 border-dashed border-slate-100 rounded-xl bg-slate-50/50">
+                            <i class="fa-regular fa-folder-open text-xl mb-1"></i><br>
+                            ยังไม่มีข้อมูลกรมธรรม์
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 pb-12">
+                    <button type="button" onclick="startAnalysis()" class="w-full bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-500/30 text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> ประมวลผลวิเคราะห์ (AI)
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- VIEW 3: PROCESSING -->
+        <section id="view-processing" class="hidden min-h-full flex flex-col items-center justify-center p-6 bg-white/60 backdrop-blur-md fixed inset-0 z-50">
+            <div class="text-center">
+                <div class="relative w-24 h-24 mx-auto mb-6">
+                    <div class="absolute inset-0 border-4 border-brand-100 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                    <i class="fa-solid fa-brain absolute inset-0 flex items-center justify-center text-3xl text-brand-500 animate-pulse"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">AI กำลังวิเคราะห์ข้อมูล...</h3>
+                <p class="text-slate-500 text-sm">กำลังประมวลผลความเสี่ยงและจัดทำคำแนะนำ</p>
+            </div>
+        </section>
+
+        <!-- VIEW 4: DASHBOARD RESULT -->
+        <section id="view-dashboard" class="hidden min-h-full pb-32 fade-in print:pb-0">
+            <!-- Summary Header -->
+            <div class="bg-slate-800 text-white p-6 rounded-b-[2.5rem] shadow-xl mb-6 relative overflow-hidden print:bg-slate-800 print:text-white print:rounded-none">
+                <div class="absolute top-0 right-0 w-40 h-40 bg-brand-500/20 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 id="res-name" class="text-2xl font-bold text-white">คุณลูกค้า</h2>
+                            <p class="text-slate-300 text-sm opacity-90 mt-1" id="res-meta">Age - | Occupation</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Risk Score</div>
+                            <div id="res-score" class="text-4xl font-bold text-brand-400 mt-1">0<span class="text-lg text-slate-500 font-normal">/100</span></div>
+                        </div>
+                    </div>
+                    <!-- Wealth Summary -->
+                    <div class="grid grid-cols-3 gap-3 bg-white/10 rounded-2xl p-4 text-center backdrop-blur-sm border border-white/5 shadow-inner">
+                        <div>
+                            <div class="text-[10px] text-slate-300">สินทรัพย์รวม</div>
+                            <div id="res-asset" class="font-bold text-sm text-green-300 mt-1">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-300">หนี้สินรวม</div>
+                            <div id="res-debt" class="font-bold text-sm text-red-300 mt-1">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-300">Net Worth</div>
+                            <div id="res-networth" class="font-bold text-sm text-white mt-1">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto px-4 space-y-6 print:px-8">
+                
+                <!-- Radar Chart -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative print:border-slate-300 print:shadow-none">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-radar text-brand-500"></i> วิเคราะห์ความเสี่ยง 5 ด้าน</h3>
+                    <div class="h-[300px] w-full flex justify-center">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Risks -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 print:border-slate-300 print:shadow-none print:break-inside-avoid">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
+                        <i class="fa-solid fa-triangle-exclamation text-orange-500"></i> ความเสี่ยงที่น่ากังวลสูงสุด
+                    </h3>
+                    <div id="top-risks-container" class="space-y-4">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+
+                <!-- Ratios -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:break-inside-avoid">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 print:border-slate-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">ภาระหนี้สิน (Debt Ratio)</span>
+                            <span id="badge-debt" class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">-</span>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mb-2" id="val-debt">0%</div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div id="bar-debt" class="bg-brand-500 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 print:border-slate-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">สภาพคล่อง (Liquidity)</span>
+                            <span id="badge-liq" class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">-</span>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mb-2" id="val-liq">0 เท่า</div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div id="bar-liq" class="bg-brand-500 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="bg-gradient-to-br from-brand-50 to-white p-6 rounded-2xl border border-brand-100 shadow-sm print:border-brand-200 print:break-inside-avoid">
+                    <h3 class="font-bold text-brand-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-lightbulb text-yellow-500"></i> คำแนะนำจากระบบ (AI Suggestion)</h3>
+                    <div id="recommendation-list" class="space-y-3">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Action Bar (Hidden in PDF) -->
+            <div class="fixed bottom-8 w-full px-4 z-30 pointer-events-none no-print">
+                <div class="max-w-4xl mx-auto flex gap-3 pointer-events-auto shadow-2xl rounded-2xl bg-white p-2 border border-slate-100">
+                    <button onclick="backToInput()" class="flex-1 bg-slate-50 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-100 text-sm transition-colors"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล</button>
+                    <button onclick="generatePDF()" class="flex-[2] bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 text-sm shadow-lg shadow-slate-500/30 transition-colors"><i class="fa-solid fa-file-pdf"></i> สร้างรายงาน PDF</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FIXED FOOTER CREDIT -->
+    <div class="credit-footer no-print">
+        Powered by <strong class="text-brand-600">PRU Academy</strong> [ttb training team]
+    </div>
+
+    <!-- SYSTEM SCRIPT -->
+    <script>
+        // --- CONFIGURATION ---
+        const SUPABASE_EDGE_URL = "https://uvlyxomlvdlemobvquku.supabase.co/functions/v1/smooth-endpoint";
+        const SUPABASE_ANON_KEY = ""; // ใส่ Supabase Anon Key ที่นี่ (Required)
+
+        // --- CONSTANTS ---
+        const rhData = {
+            "RH1": ["Zone จตุจักร", "Zone ธนบุรี", "Zone บางกะปิ", "Zone สาทร", "Zone สุขุมวิท"],
+            "RH2": ["Zone ชลบุรี", "Zone บางนา", "Zone พัทยา", "Zone ระยอง"],
+            "RH3": ["Zone เชียงใหม่", "Zone นครสวรรค์", "Zone นนทบุรี", "Zone พิษณุโลก", "Zone อยุธยา"],
+            "RH4": ["Zone ดอนเมือง", "Zone นครราชสีมา", "Zone สระบุรี", "Zone อุดรธานี", "Zone อุบลราชธานี"],
+            "RH5": ["Zone ภูเก็ต", "Zone ราชบุรี", "Zone สมุทรสาคร", "Zone สุราษฎร์ธานี", "Zone หาดใหญ่"]
         };
 
-        // MAIN APP
-        function App() {
-            const [isAuthenticated, setIsAuthenticated] = useState(false);
-            const [currentUser, setCurrentUser] = useState(null);
-            const [view, setView] = useState('dashboard');
-            const [trainings, setTrainings] = useState(INITIAL_TRAININGS);
-            const [selectedTraining, setSelectedTraining] = useState(null);
-            const [isModalOpen, setIsModalOpen] = useState(false);
-            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-            const [notifications] = useState(3);
-            
-            const TODAY = new Date('2026-02-10');
+        const insuranceTypes = [
+            "ประกันชีวิต (คุ้มครองตลอดชีพ/ชั่วระยะเวลา)",
+            "ประกันสะสมทรัพย์",
+            "ประกันสุขภาพ (Health)",
+            "ประกันโรคร้ายแรง (CI)",
+            "ประกันอุบัติเหตุ (PA)",
+            "ประกันบำนาญ"
+        ];
 
-            // Enhanced Login View with Modern Design
-            const LoginView = () => {
-                const [selectedUser, setSelectedUser] = useState("");
-                const [passcode, setPasscode] = useState("");
-                const [error, setError] = useState("");
-                const [isLoading, setIsLoading] = useState(false);
+        // --- STATE ---
+        let appState = {
+            emp: null,
+            cust: null,
+            risks: [],
+            stats: {},
+            aiStrategies: null
+        };
 
-                const handleLogin = async () => {
-                    setIsLoading(true);
-                    // Simulate API call
-                    setTimeout(() => {
-                        const user = INITIAL_USERS.find(u => u.name === selectedUser);
-                        if (user && passcode === getPasscode(user.name)) {
-                            setCurrentUser(user);
-                            setIsAuthenticated(true);
-                            setView('dashboard');
-                        } else {
-                            setError("Invalid credentials. Please try again.");
-                        }
-                        setIsLoading(false);
-                    }, 800);
-                };
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('passcode-area').classList.remove('hidden');
+                document.getElementById('passcode-input').focus();
+            }, 2000);
+        };
 
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4 font-sans">
-                        <div className="absolute inset-0 overflow-hidden">
-                            <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-slow"></div>
-                            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-slow" style={{animationDelay: '1s'}}></div>
-                        </div>
-                        
-                        <div className="relative w-full max-w-md glass rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
-                            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-                            
-                            <div className="p-10">
-                                <div className="text-center mb-8">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                        <HomeIcon className="w-10 h-10 text-white" />
-                                    </div>
-                                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-gradient">Training Portal 2026</h1>
-                                    <p className="text-slate-600 mt-2 font-medium">Modern Training Management System</p>
-                                </div>
-                                
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                            <UserIcon className="w-4 h-4" />
-                                            Select Trainer
-                                        </label>
-                                        <div className="relative">
-                                            <select 
-                                                className="w-full p-4 bg-white/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all appearance-none pl-12 pr-4 text-slate-700 font-medium"
-                                                value={selectedUser}
-                                                onChange={(e) => { setSelectedUser(e.target.value); setError(""); }}
-                                            >
-                                                <option value="" className="text-slate-400">Choose your name</option>
-                                                {INITIAL_USERS.map(u => 
-                                                    <option key={u.id} value={u.name} className="text-slate-700">
-                                                        {u.name} {u.isAdmin ? '(Admin)' : ''}
-                                                    </option>
-                                                )}
-                                            </select>
-                                            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                                                <ChevronRight className="w-4 h-4 text-slate-400" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {selectedUser && (
-                                        <div className="space-y-2 animate-slide-in">
-                                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                                <LockIcon className="w-4 h-4" />
-                                                Passcode
-                                            </label>
-                                            <div className="relative">
-                                                <input 
-                                                    type="password"
-                                                    placeholder="Enter your passcode"
-                                                    className="w-full pl-12 pr-4 py-4 bg-white/80 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 font-medium"
-                                                    value={passcode}
-                                                    onChange={(e) => setPasscode(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                                                />
-                                                <LockIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {error && (
-                                        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 animate-fade-in">
-                                            <div className="flex items-center gap-2 text-rose-600 font-medium">
-                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
-                                                </svg>
-                                                {error}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <button 
-                                        onClick={handleLogin}
-                                        disabled={!selectedUser || !passcode || isLoading}
-                                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover:shadow-indigo-200 hover-lift transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Signing In...
-                                            </>
-                                        ) : (
-                                            <>
-                                                Enter System
-                                                <ChevronRight className="w-5 h-5" />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-
-                                <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-                                    <p className="text-slate-500 text-sm">
-                                        Need help? Contact support at{' '}
-                                        <span className="text-indigo-600 font-medium">support@training.com</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-
-            if (!isAuthenticated) return <LoginView />;
-
-            // Modern Dashboard View
-            const DashboardView = () => {
-                const projectStats = COURSE_GROUPS.map(group => {
-                    const groupTrainings = trainings.filter(t => group.courses.includes(t.course));
-                    const total = groupTrainings.length;
-                    const completed = groupTrainings.filter(t => t.status === 'Completed').length;
-                    return { ...group, total, completed, percent: total > 0 ? Math.round((completed/total)*100) : 0 };
+        // --- 1. ACCESS CONTROL ---
+        function checkPasscode() {
+            const input = document.getElementById('passcode-input').value.trim();
+            if (input.toLowerCase() === "mama") {
+                document.getElementById('view-splash').classList.add('hidden');
+                document.getElementById('main-container').classList.remove('hidden');
+                
+                const savedEmp = localStorage.getItem('caas_emp');
+                if(savedEmp) {
+                    appState.emp = JSON.parse(savedEmp);
+                    updateHeader();
+                    navTo('input');
+                } else {
+                    navTo('login');
+                }
+            } else {
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'รหัสผ่านไม่ถูกต้อง', 
+                    text: 'กรุณาลองใหม่อีกครั้ง', 
+                    timer: 1500, 
+                    showConfirmButton: false 
                 });
-
-                const myTrainings = trainings.filter(t => t.trainers.includes(currentUser.name));
-                const myCompleted = myTrainings.filter(t => t.status === 'Completed').length;
-                const myPercent = myTrainings.length > 0 ? Math.round((myCompleted / myTrainings.length) * 100) : 0;
-
-                return (
-                    <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-12">
-                        {/* Header with Stats */}
-                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                            <div>
-                                <h1 className="text-3xl font-bold text-slate-900">Dashboard Overview</h1>
-                                <p className="text-slate-600 mt-2">Welcome back, {currentUser.name}! Here's your training summary.</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <button className="p-3 bg-white rounded-xl border border-slate-200 hover:border-slate-300 transition-all hover-lift relative">
-                                        <BellIcon />
-                                        {notifications > 0 && (
-                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                                                {notifications}
-                                            </span>
-                                        )}
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm p-3 rounded-2xl border border-slate-200 shadow-sm">
-                                    <UserInitial name={currentUser.name} size="sm" />
-                                    <div>
-                                        <p className="text-sm font-semibold text-slate-900">{currentUser.name}</p>
-                                        <p className="text-xs text-slate-500">{currentUser.role}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Quick Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-2xl border border-indigo-100 card-hover">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-indigo-100 rounded-xl">
-                                        <ListIcon className="w-6 h-6 text-indigo-600" />
-                                    </div>
-                                    <span className="text-2xl font-bold text-slate-900">{myTrainings.length}</span>
-                                </div>
-                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Total Tasks</h3>
-                                <p className="text-xs text-slate-500">Assigned training sessions</p>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-2xl border border-emerald-100 card-hover">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-emerald-100 rounded-xl">
-                                        <CheckIcon className="w-6 h-6 text-emerald-600" />
-                                    </div>
-                                    <span className="text-2xl font-bold text-slate-900">{myCompleted}</span>
-                                </div>
-                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Completed</h3>
-                                <p className="text-xs text-slate-500">Finished sessions</p>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-amber-50 to-white p-6 rounded-2xl border border-amber-100 card-hover">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-amber-100 rounded-xl">
-                                        <ClockIcon className="w-6 h-6 text-amber-600" />
-                                    </div>
-                                    <span className="text-2xl font-bold text-slate-900">{myTrainings.length - myCompleted}</span>
-                                </div>
-                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Pending</h3>
-                                <p className="text-xs text-slate-500">Upcoming sessions</p>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border border-purple-100 card-hover">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-purple-100 rounded-xl">
-                                        <AwardIcon className="w-6 h-6 text-purple-600" />
-                                    </div>
-                                    <span className="text-2xl font-bold text-slate-900">Rank A</span>
-                                </div>
-                                <h3 className="text-sm font-semibold text-slate-700 mb-1">Performance</h3>
-                                <p className="text-xs text-slate-500">Current ranking</p>
-                            </div>
-                        </div>
-
-                        {/* Main Content Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Left Column - Progress & Profile */}
-                            <div className="lg:col-span-2 space-y-8">
-                                {/* Course Group Progress */}
-                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-xl font-bold text-slate-900">Course Progress</h2>
-                                        <span className="text-sm font-semibold text-indigo-600">{myPercent}% Overall</span>
-                                    </div>
-                                    <div className="space-y-6">
-                                        {projectStats.map((stat, i) => (
-                                            <div key={i} className="space-y-3">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm font-semibold text-slate-700">{stat.name}</span>
-                                                    <span className="text-sm font-bold text-slate-900">{stat.percent}%</span>
-                                                </div>
-                                                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                                    <div 
-                                                        className="h-full rounded-full transition-all duration-1000"
-                                                        style={{ 
-                                                            width: `${stat.percent}%`,
-                                                            background: `linear-gradient(90deg, ${stat.color.split(' ')[2]} 0%, ${stat.color.split(' ')[5]} 100%)`
-                                                        }}
-                                                    ></div>
-                                                </div>
-                                                <div className="flex justify-between text-xs text-slate-500">
-                                                    <span>{stat.completed} completed</span>
-                                                    <span>{stat.total} total</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Upcoming Trainings */}
-                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-xl font-bold text-slate-900">Upcoming Sessions</h2>
-                                        <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                            View All →
-                                        </button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        {myTrainings.slice(0, 3).map(t => (
-                                            <div key={t.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl hover:bg-slate-50 transition-all group">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`p-3 rounded-xl ${t.status === 'Completed' ? 'bg-emerald-100' : 'bg-indigo-100'}`}>
-                                                        {t.status === 'Completed' ? 
-                                                            <CheckIcon className="w-5 h-5 text-emerald-600" /> : 
-                                                            <ClockIcon className="w-5 h-5 text-indigo-600" />
-                                                        }
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{t.course}</h4>
-                                                        <div className="flex items-center gap-3 mt-1">
-                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                                <CalendarIcon className="w-3 h-3" />
-                                                                {new Date(t.date).toLocaleDateString('en-GB')}
-                                                            </span>
-                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                                <MapPinIcon className="w-3 h-3" />
-                                                                {t.location}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <StatusBadge status={t.status} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Column - Profile Card */}
-                            <div className="space-y-8">
-                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-8 card-hover">
-                                    <div className="flex flex-col items-center text-center mb-6">
-                                        <UserInitial name={currentUser.name} size="xl" className="mb-4 ring-4 ring-white/20" />
-                                        <h3 className="text-xl font-bold mb-1">{currentUser.name}</h3>
-                                        <p className="text-slate-300 mb-4">{currentUser.role}</p>
-                                        <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden mb-2">
-                                            <div 
-                                                className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 transition-all duration-1000"
-                                                style={{ width: `${myPercent}%` }}
-                                            ></div>
-                                        </div>
-                                        <p className="text-sm text-slate-300">{myPercent}% Personal Progress</p>
-                                    </div>
-                                    
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                                            <span className="text-slate-300">Trainings Completed</span>
-                                            <span className="font-bold">{myCompleted}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                                            <span className="text-slate-300">Hours Logged</span>
-                                            <span className="font-bold">{myCompleted * 8} hrs</span>
-                                        </div>
-                                        <div className="flex justify-between items-center p-3 bg-white/10 rounded-xl">
-                                            <span className="text-slate-300">Success Rate</span>
-                                            <span className="font-bold">{myPercent}%</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Quick Actions */}
-                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 card-hover">
-                                    <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
-                                    <div className="space-y-3">
-                                        <button className="w-full flex items-center justify-between p-3 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-all group">
-                                            <span className="font-semibold">Add New Training</span>
-                                            <PlusIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                                        </button>
-                                        <button className="w-full flex items-center justify-between p-3 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all group">
-                                            <span className="font-semibold">Generate Report</span>
-                                            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/>
-                                            </svg>
-                                        </button>
-                                        <button 
-                                            onClick={() => setView('calendar')}
-                                            className="w-full flex items-center justify-between p-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-all group"
-                                        >
-                                            <span className="font-semibold">View Calendar</span>
-                                            <CalendarIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-
-            // Modern Calendar View
-            const CalendarView = () => {
-                const [curr, setCurr] = useState(new Date('2026-02-01'));
-                const [viewMode, setViewMode] = useState('month'); // month, week, day
-                
-                const next = () => {
-                    const newDate = new Date(curr);
-                    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + 1);
-                    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + 7);
-                    else newDate.setDate(newDate.getDate() + 1);
-                    setCurr(newDate);
-                };
-                
-                const prev = () => {
-                    const newDate = new Date(curr);
-                    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() - 1);
-                    else if (viewMode === 'week') newDate.setDate(newDate.getDate() - 7);
-                    else newDate.setDate(newDate.getDate() - 1);
-                    setCurr(newDate);
-                };
-                
-                const days = new Date(curr.getFullYear(), curr.getMonth() + 1, 0).getDate();
-                const start = new Date(curr.getFullYear(), curr.getMonth(), 1).getDay();
-
-                return (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full animate-fade-in max-w-7xl mx-auto w-full overflow-hidden">
-                        {/* Calendar Header */}
-                        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-900">Training Calendar</h2>
-                                <p className="text-slate-600">View and manage your training schedule</p>
-                            </div>
-                            
-                            <div className="flex flex-wrap items-center gap-3">
-                                <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-xl">
-                                    {['month', 'week', 'day'].map(mode => (
-                                        <button
-                                            key={mode}
-                                            onClick={() => setViewMode(mode)}
-                                            className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
-                                                viewMode === mode 
-                                                ? 'bg-white text-slate-900 shadow-sm' 
-                                                : 'text-slate-600 hover:text-slate-900'
-                                            }`}
-                                        >
-                                            {mode}
-                                        </button>
-                                    ))}
-                                </div>
-                                
-                                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl">
-                                    <button onClick={prev} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all">
-                                        <ChevronLeft className="w-5 h-5 text-slate-600" />
-                                    </button>
-                                    <span className="font-bold text-lg min-w-[180px] text-center text-slate-900">
-                                        {curr.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                                    </span>
-                                    <button onClick={next} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all">
-                                        <ChevronRight className="w-5 h-5 text-slate-600" />
-                                    </button>
-                                </div>
-                                
-                                <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover:shadow-indigo-200 hover-lift transition-all">
-                                    <PlusIcon className="w-4 h-4 inline mr-2" />
-                                    Add Event
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Calendar Grid */}
-                        <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                                <div key={d} className="py-4 text-center text-xs font-bold text-slate-700 uppercase tracking-wider">
-                                    {d}
-                                </div>
-                            ))}
-                        </div>
-                        
-                        <div className="grid grid-cols-7 flex-1 auto-rows-fr">
-                            {Array.from({ length: 42 }).map((_, i) => {
-                                const day = i - start + 1;
-                                const isValid = day > 0 && day <= days;
-                                const dStr = `2026-${String(curr.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                                const evts = isValid ? trainings.filter(t => t.date === dStr) : [];
-                                const isToday = TODAY.toISOString().split('T')[0] === dStr;
-                                
-                                return (
-                                    <div 
-                                        key={i} 
-                                        className={`min-h-[140px] p-3 border-r border-b border-slate-50 relative group ${
-                                            isValid ? 'bg-white hover:bg-slate-50/50' : 'bg-slate-50/30'
-                                        } ${isToday ? 'highlight-shadow' : ''}`}
-                                    >
-                                        {isValid && (
-                                            <>
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className={`text-base font-bold w-8 h-8 flex items-center justify-center rounded-xl ${
-                                                        isToday 
-                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
-                                                        : 'text-slate-400'
-                                                    }`}>
-                                                        {day}
-                                                    </span>
-                                                    {isToday && (
-                                                        <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-                                                            Today
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                
-                                                <div className="space-y-2">
-                                                    {evts.slice(0, 3).map(e => (
-                                                        <div 
-                                                            key={e.id} 
-                                                            onClick={() => { setSelectedTraining(e); setIsModalOpen(true); }}
-                                                            className="text-xs p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl cursor-pointer font-semibold hover-lift transition-all group/item"
-                                                        >
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="truncate">{e.course}</span>
-                                                                <ChevronRight className="w-3 h-3 opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                                                            </div>
-                                                            <div className="text-[10px] text-indigo-600/70 mt-1 flex items-center gap-1">
-                                                                <ClockIcon className="w-3 h-3" />
-                                                                {e.trainers.length} trainers
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    
-                                                    {evts.length > 3 && (
-                                                        <div className="text-xs text-slate-500 font-medium p-2 text-center">
-                                                            +{evts.length - 3} more
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            };
-
-            // Modern TrainerView
-            const TrainerView = () => {
-                const myTrainings = trainings.filter(t => t.trainers.includes(currentUser.name));
-                const upcomingTrainings = myTrainings.filter(t => new Date(t.date) >= TODAY);
-                const completedTrainings = myTrainings.filter(t => t.status === 'Completed');
-
-                return (
-                    <div className="space-y-8 animate-fade-in max-w-7xl mx-auto w-full pb-12">
-                        {/* Hero Header */}
-                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
-                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                                <div>
-                                    <h1 className="text-3xl font-bold mb-2">{currentUser.name}'s Training Portal</h1>
-                                    <p className="text-indigo-100">Track your performance, schedule, and achievements</p>
-                                </div>
-                                <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl">
-                                    <div className="text-center">
-                                        <div className="text-4xl font-bold mb-1">
-                                            {Math.round((completedTrainings.length / myTrainings.length) * 100) || 0}%
-                                        </div>
-                                        <div className="text-sm text-indigo-100">Completion Rate</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-indigo-100 rounded-xl">
-                                        <TargetIcon className="w-6 h-6 text-indigo-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-2xl font-bold text-slate-900">{upcomingTrainings.length}</p>
-                                        <p className="text-sm font-semibold text-slate-600">Upcoming</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-emerald-100 rounded-xl">
-                                        <CheckIcon className="w-6 h-6 text-emerald-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-2xl font-bold text-slate-900">{completedTrainings.length}</p>
-                                        <p className="text-sm font-semibold text-slate-600">Completed</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-amber-100 rounded-xl">
-                                        <ClockIcon className="w-6 h-6 text-amber-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-2xl font-bold text-slate-900">{completedTrainings.length * 8}</p>
-                                        <p className="text-sm font-semibold text-slate-600">Hours Logged</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm card-hover">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-purple-100 rounded-xl">
-                                        <AwardIcon className="w-6 h-6 text-purple-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-2xl font-bold text-slate-900">Rank A</p>
-                                        <p className="text-sm font-semibold text-slate-600">Performance</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Training Schedule */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2">
-                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                                    <div className="p-6 border-b border-slate-100">
-                                        <h3 className="text-xl font-bold text-slate-900">Training Schedule</h3>
-                                        <p className="text-slate-600">Your upcoming and completed training sessions</p>
-                                    </div>
-                                    <div className="divide-y divide-slate-100">
-                                        {myTrainings.map(t => (
-                                            <div key={t.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50/50 transition-all group">
-                                                <div className="flex items-center gap-6">
-                                                    <div className={`w-20 h-20 flex flex-col items-center justify-center rounded-2xl border-2 ${
-                                                        new Date(t.date) < TODAY 
-                                                        ? 'bg-slate-100 text-slate-400 border-slate-200' 
-                                                        : 'bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-700 border-indigo-200'
-                                                    }`}>
-                                                        <span className="text-[10px] font-black uppercase">
-                                                            {new Date(t.date).toLocaleString('default', { month: 'short' })}
-                                                        </span>
-                                                        <span className="text-2xl font-black">{new Date(t.date).getDate()}</span>
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                                                            {t.course}
-                                                        </h4>
-                                                        <div className="flex flex-wrap items-center gap-3 mt-2">
-                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                                <MapPinIcon className="w-3 h-3" />
-                                                                {t.location}
-                                                            </span>
-                                                            <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                                <TargetIcon className="w-3 h-3" />
-                                                                {t.rh}
-                                                            </span>
-                                                            <span className="text-xs text-slate-500">
-                                                                {t.attendees} attendees
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4 md:mt-0 flex items-center gap-4">
-                                                    <StatusBadge status={t.status} />
-                                                    <button 
-                                                        onClick={() => { setSelectedTraining(t); setIsModalOpen(true); }}
-                                                        className="p-2 text-slate-400 hover:text-indigo-600 transition-colors hover-lift"
-                                                    >
-                                                        <ChevronRight className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Performance Insights */}
-                            <div className="space-y-6">
-                                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                                    <h4 className="font-bold text-slate-900 mb-4">Performance Insights</h4>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <div className="flex justify-between text-sm font-semibold text-slate-700 mb-1">
-                                                <span>Attendance Rate</span>
-                                                <span>94%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                                <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full" style={{ width: '94%' }}></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm font-semibold text-slate-700 mb-1">
-                                                <span>Training Quality</span>
-                                                <span>96%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                                <div className="bg-gradient-to-r from-blue-400 to-blue-500 h-full" style={{ width: '96%' }}></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm font-semibold text-slate-700 mb-1">
-                                                <span>Participant Satisfaction</span>
-                                                <span>98%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                                <div className="bg-gradient-to-r from-purple-400 to-purple-500 h-full" style={{ width: '98%' }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6">
-                                    <h4 className="font-bold mb-4">Recent Achievements</h4>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
-                                            <div className="p-2 bg-emerald-500/20 rounded-lg">
-                                                <AwardIcon className="w-5 h-5 text-emerald-400" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-semibold">Top Performer</p>
-                                                <p className="text-xs text-slate-300">January 2026</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
-                                            <div className="p-2 bg-amber-500/20 rounded-lg">
-                                                <TargetIcon className="w-5 h-5 text-amber-400" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-semibold">Perfect Attendance</p>
-                                                <p className="text-xs text-slate-300">Q4 2025</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
-                                            <div className="p-2 bg-blue-500/20 rounded-lg">
-                                                <TrendingIcon className="w-5 h-5 text-blue-400" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-semibold">Fast Growth</p>
-                                                <p className="text-xs text-slate-300">Rising Star Award</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-
-            // Modern ScheduleView
-            const ScheduleView = () => {
-                const [searchQuery, setSearchQuery] = useState('');
-                const [filterStatus, setFilterStatus] = useState('all');
-                
-                const filteredTrainings = trainings.filter(t => {
-                    const matchesSearch = t.course.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                         t.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                         t.trainers.some(trainer => trainer.toLowerCase().includes(searchQuery.toLowerCase()));
-                    
-                    const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
-                    
-                    return matchesSearch && matchesStatus;
-                });
-
-                return (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full animate-fade-in max-w-7xl mx-auto">
-                        {/* Enhanced Header with Filters */}
-                        <div className="p-6 bg-white border-b border-slate-100">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-slate-900">Training Schedule</h2>
-                                    <p className="text-slate-600">Manage and track all training sessions</p>
-                                </div>
-                                
-                                {currentUser.isAdmin && (
-                                    <button 
-                                        onClick={() => { 
-                                            setSelectedTraining({ 
-                                                id: Date.now(), 
-                                                date: '', 
-                                                endDate: '', 
-                                                course: COURSES[0], 
-                                                segment: SEGMENTS[0], 
-                                                zone: ZONES[0], 
-                                                rh: RHS[0], 
-                                                location: '', 
-                                                trainers: [], 
-                                                status: 'Planned', 
-                                                confirmed: false, 
-                                                attendees: 0 
-                                            }); 
-                                            setIsModalOpen(true); 
-                                        }}
-                                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover:shadow-indigo-200 hover-lift transition-all flex items-center gap-2"
-                                    >
-                                        <PlusIcon className="w-5 h-5" />
-                                        Add New Training
-                                    </button>
-                                )}
-                            </div>
-                            
-                            {/* Search and Filter Bar */}
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="relative flex-1">
-                                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search by course, location, or trainer..." 
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                                
-                                <div className="flex gap-2">
-                                    <select 
-                                        className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                                        value={filterStatus}
-                                        onChange={(e) => setFilterStatus(e.target.value)}
-                                    >
-                                        <option value="all">All Status</option>
-                                        <option value="Planned">Planned</option>
-                                        <option value="Confirmed">Confirmed</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Cancelled">Cancelled</option>
-                                    </select>
-                                    
-                                    <button className="px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
-                                        Export
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Modern Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-slate-50 border-b border-slate-100">
-                                    <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Course</th>
-                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Location</th>
-                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Trainers</th>
-                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                                        <th className="px6 py-4 text-xs font-semibold text-slate-600 uppercase tracking-wider text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {filteredTrainings.map(t => (
-                                        <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-900">
-                                                        {new Date(t.date).toLocaleDateString('en-GB')}
-                                                    </span>
-                                                    <span className="text-xs text-slate-500">
-                                                        {t.rh} • {t.zone}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="font-semibold text-slate-900">{t.course}</div>
-                                                <div className="text-xs text-slate-500">{t.segment}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2 text-slate-700">
-                                                    <MapPinIcon className="w-4 h-4 text-slate-400" />
-                                                    {t.location}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex -space-x-2">
-                                                    {t.trainers.slice(0, 3).map((tr, i) => (
-                                                        <UserInitial key={i} name={tr} size="sm" className="ring-2 ring-white" />
-                                                    ))}
-                                                    {t.trainers.length > 3 && (
-                                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 ring-2 ring-white">
-                                                            +{t.trainers.length - 3}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <StatusBadge status={t.status} />
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <button 
-                                                    onClick={() => { setSelectedTraining(t); setIsModalOpen(true); }}
-                                                    className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm hover-lift transition-all px-4 py-2 rounded-lg hover:bg-indigo-50"
-                                                >
-                                                    View Details →
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                );
-            };
-
-            // Modern Modal Component
-            const Modal = () => {
-                if (!isModalOpen || !selectedTraining) return null;
-                const [form, setForm] = useState(selectedTraining);
-                const isPast = new Date(form.date) <= TODAY;
-
-                const handleSave = () => {
-                    if (!currentUser.isAdmin) return;
-                    setTrainings(prev => {
-                        const idx = prev.findIndex(t => t.id === form.id);
-                        if (idx >= 0) {
-                            const updated = [...prev];
-                            updated[idx] = form;
-                            return updated;
-                        }
-                        return [...prev, form];
-                    });
-                    setIsModalOpen(false);
-                };
-
-                return (
-                    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-                        <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
-                            {/* Modal Header */}
-                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
-                                <div>
-                                    <h3 className="text-2xl font-bold text-slate-900">Training Details</h3>
-                                    <p className="text-slate-600">Edit training information and assignments</p>
-                                </div>
-                                <button 
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-                                >
-                                    <XIcon className="w-6 h-6" />
-                                </button>
-                            </div>
-                            
-                            {/* Modal Body */}
-                            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
-                                {/* Left Column */}
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Course Name</label>
-                                        <select 
-                                            disabled={!currentUser.isAdmin}
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                            value={form.course}
-                                            onChange={e => setForm({...form, course: e.target.value})}
-                                        >
-                                            {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Training Date</label>
-                                        <input 
-                                            disabled={!currentUser.isAdmin}
-                                            type="date" 
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-50"
-                                            value={form.date}
-                                            onChange={e => setForm({...form, date: e.target.value})}
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Location</label>
-                                        <input 
-                                            disabled={!currentUser.isAdmin}
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-50"
-                                            value={form.location}
-                                            onChange={e => setForm({...form, location: e.target.value})}
-                                            placeholder="Enter training location"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                {/* Right Column */}
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Region (RH)</label>
-                                        <select 
-                                            disabled={!currentUser.isAdmin}
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                            value={form.rh}
-                                            onChange={e => setForm({...form, rh: e.target.value})}
-                                        >
-                                            {RHS.map(rh => <option key={rh} value={rh}>{rh}</option>)}
-                                        </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
-                                        <select 
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                            value={form.status}
-                                            onChange={e => {
-                                                if (e.target.value === 'Completed' && !isPast) {
-                                                    alert('Cannot mark as completed before training date!');
-                                                    return;
-                                                }
-                                                setForm({...form, status: e.target.value});
-                                            }}
-                                        >
-                                            <option value="Planned">Planned</option>
-                                            <option value="Confirmed">Confirmed</option>
-                                            <option value="Completed">Completed</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Number of Attendees</label>
-                                        <input 
-                                            type="number"
-                                            min="0"
-                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                            value={form.attendees}
-                                            onChange={e => setForm({...form, attendees: parseInt(e.target.value) || 0})}
-                                        />
-                                    </div>
-                                </div>
-                                
-                                {/* Full Width - Trainers Assignment */}
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-semibold text-slate-700 mb-4">Assign Trainers</label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                        {INITIAL_USERS.map(u => (
-                                            <button 
-                                                key={u.id}
-                                                disabled={!currentUser.isAdmin}
-                                                onClick={() => {
-                                                    const has = form.trainers.includes(u.name);
-                                                    setForm({
-                                                        ...form,
-                                                        trainers: has 
-                                                            ? form.trainers.filter(t => t !== u.name)
-                                                            : [...form.trainers, u.name]
-                                                    });
-                                                }}
-                                                className={`p-4 rounded-xl border-2 transition-all hover-lift ${
-                                                    form.trainers.includes(u.name)
-                                                    ? 'border-indigo-500 bg-indigo-50'
-                                                    : 'border-slate-200 bg-white hover:border-slate-300'
-                                                } ${!currentUser.isAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <UserInitial name={u.name} size="sm" />
-                                                    <div className="text-center">
-                                                        <div className="text-xs font-semibold text-slate-700 truncate">
-                                                            {u.name}
-                                                        </div>
-                                                        <div className="text-[10px] text-slate-500">
-                                                            {u.isAdmin ? 'Admin' : 'Trainer'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Modal Footer */}
-                            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
-                                <button 
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-6 py-3 text-slate-600 hover:text-slate-800 font-semibold hover:bg-white rounded-xl transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                
-                                {currentUser.isAdmin && (
-                                    <button 
-                                        onClick={handleSave}
-                                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:shadow-xl hover-lift transition-all"
-                                    >
-                                        Save Changes
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-
-            // Navigation Items with improved contrast
-            const navItems = [
-                { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-                { id: 'schedule', label: 'Schedule', icon: <ListIcon /> },
-                { id: 'calendar', label: 'Calendar', icon: <CalendarIcon /> },
-                { id: 'trainerView', label: 'My Portal', icon: <UserIcon /> },
-                { id: 'reports', label: 'Analytics', icon: <ChartIcon /> },
-            ];
-
-            return (
-                <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 font-sans text-slate-900 overflow-hidden">
-                    {/* Modern Sidebar */}
-                    <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-72 flex-col bg-gradient-to-b from-slate-900 to-slate-800 text-white transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:flex`}>
-                        <div className="p-6 border-b border-white/10">
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <HomeIcon className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h1 className="text-lg font-bold">Training Portal</h1>
-                                    <p className="text-xs text-slate-300">2026 Edition</p>
-                                </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-3 p-3 bg-white/10 rounded-xl mb-6">
-                                <UserInitial name={currentUser.name} size="sm" />
-                                <div className="flex-1">
-                                    <p className="text-sm font-semibold">{currentUser.name}</p>
-                                    <p className="text-xs text-slate-300">{currentUser.role}</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <nav className="flex-1 p-4 space-y-1">
-                            {navItems.map(item => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => {
-                                        setView(item.id);
-                                        setIsSidebarOpen(false);
-                                    }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                                        view === item.id
-                                        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
-                                        : 'text-slate-300 hover:text-white hover:bg-white/5'
-                                    }`}
-                                >
-                                    {item.icon}
-                                    {item.label}
-                                </button>
-                            ))}
-                        </nav>
-                        
-                        <div className="p-4 border-t border-white/10">
-                            <button 
-                                onClick={() => { setIsAuthenticated(false); setView('home'); }}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all"
-                            >
-                                <LogoutIcon />
-                                Logout
-                            </button>
-                        </div>
-                    </aside>
-
-                    {/* Main Content */}
-                    <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
-                        {/* Mobile Header */}
-                        <header className="lg:hidden h-16 bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30">
-                            <div className="flex items-center gap-3">
-                                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                                    <MenuIcon className="w-6 h-6 text-slate-700" />
-                                </button>
-                                <h1 className="font-bold text-slate-900">Training Portal</h1>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <BellIcon className="w-5 h-5 text-slate-600" />
-                                <UserInitial name={currentUser.name} size="sm" />
-                            </div>
-                        </header>
-                        
-                        {/* Main Content Area */}
-                        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-                            {view === 'dashboard' && <DashboardView />}
-                            {view === 'schedule' && <ScheduleView />}
-                            {view === 'calendar' && <CalendarView />}
-                            {view === 'trainerView' && <TrainerView />}
-                            {view === 'reports' && (
-                                <div className="max-w-7xl mx-auto">
-                                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-                                        <h2 className="text-2xl font-bold text-slate-900 mb-2">Analytics & Reports</h2>
-                                        <p className="text-slate-600 mb-8">Comprehensive analytics dashboard coming soon...</p>
-                                        <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center">
-                                            <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                                <ChartIcon className="w-8 h-8 text-indigo-600" />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-slate-900 mb-2">Advanced Analytics</h3>
-                                            <p className="text-slate-600 max-w-md mx-auto">
-                                                Detailed reports, performance metrics, and data visualizations will be available here in the next update.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </main>
-                    </div>
-
-                    <Modal />
-
-                    {/* Background Overlay for Mobile Sidebar */}
-                    {isSidebarOpen && (
-                        <div 
-                            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden"
-                            onClick={() => setIsSidebarOpen(false)}
-                        ></div>
-                    )}
-                </div>
-            );
+                document.getElementById('passcode-input').value = '';
+            }
         }
 
-        // Render the app
-        ReactDOM.render(<App />, document.getElementById('root'));
+        // --- NAVIGATION & UI ---
+        function navTo(viewId) {
+            ['login', 'input', 'dashboard', 'processing'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+            const target = document.getElementById(`view-${viewId}`);
+            target.classList.remove('hidden');
+            if(viewId === 'input' || viewId === 'login') target.classList.add('slide-up');
+            if(viewId === 'dashboard') target.classList.add('fade-in');
+            document.getElementById('main-container').scrollTop = 0;
+        }
+
+        function resetSystem() {
+            Swal.fire({
+                title: 'ออกจากระบบ?',
+                text: "ข้อมูลลูกค้าปัจจุบันจะถูกล้าง",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'ระบบไม่บันทึกข้อมูลลูกค้า',
+                        text: 'ข้อมูลทั้งหมดจะถูกลบเพื่อความปลอดภัย',
+                        confirmButtonText: 'ตกลง'
+                    }).then(() => {
+                        localStorage.removeItem('caas_emp');
+                        location.reload();
+                    });
+                }
+            });
+        }
+
+        // --- 2. EMPLOYEE HANDLING ---
+        function validateEmpId(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+        }
+
+        function updateZones() {
+            const rh = document.getElementById('empRH').value;
+            const zSelect = document.getElementById('empZone');
+            zSelect.innerHTML = '<option value="">เลือก Zone</option>';
+            zSelect.disabled = true;
+            if (rh && rhData[rh]) {
+                zSelect.disabled = false;
+                rhData[rh].forEach(z => zSelect.innerHTML += `<option value="${z}">${z}</option>`);
+            }
+        }
+
+        function handleEmpLogin(e) {
+            e.preventDefault();
+            const emp = {
+                id: document.getElementById('empId').value,
+                job: document.getElementById('empJob').value,
+                rh: document.getElementById('empRH').value,
+                zone: document.getElementById('empZone').value
+            };
+            appState.emp = emp;
+            localStorage.setItem('caas_emp', JSON.stringify(emp));
+            updateHeader();
+            navTo('input');
+        }
+
+        function updateHeader() {
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('header-emp-job').innerText = appState.emp.job;
+            document.getElementById('header-emp-zone').innerText = `${appState.emp.rh} | ${appState.emp.zone}`;
+        }
+
+        // --- 3. INPUT FORM HANDLING ---
+        function toggleBizSection() {
+            const job = document.getElementById('custJob').value;
+            const bizSec = document.getElementById('sec-biz');
+            job === "เจ้าของกิจการ" ? bizSec.classList.remove('hidden') : bizSec.classList.add('hidden');
+        }
+
+        function validateNumber(input) {
+            const val = parseFloat(input.value);
+            const err = input.nextElementSibling;
+            if (input.value !== "" && isNaN(val)) {
+                input.classList.add('error');
+                if(err && err.classList.contains('error-text')) err.style.display = 'block';
+                input.value = ""; 
+            } else {
+                input.classList.remove('error');
+                if(err && err.classList.contains('error-text')) err.style.display = 'none';
+            }
+        }
+
+        function calcYearly() {
+            const m = parseFloat(document.getElementById('custIncome').value) || 0;
+            const y = m * 12;
+            document.getElementById('displayYearly').innerText = y.toLocaleString();
+        }
+
+        function generateChildRows() {
+            const count = parseInt(document.getElementById('childCount').value) || 0;
+            const container = document.getElementById('child-details-container');
+            container.innerHTML = '';
+            for(let i=1; i<=count; i++) {
+                const row = document.createElement('div');
+                row.className = "grid grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-100 rounded-lg animate-[fadeIn_0.3s_ease-in]";
+                row.innerHTML = `
+                    <div><label class="inp-label text-xs">อายุบุตรคนที่ ${i} (ปี)</label><input type="number" class="inp-field text-sm child-age" placeholder="อายุ" required oninput="validateNumber(this)"></div>
+                    <div><label class="inp-label text-xs">สถานะบุตรคนที่ ${i}</label><select class="inp-field text-sm child-status"><option value="studying">เรียนอยู่</option><option value="working">ทำงานแล้ว</option></select></div>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        function addPolicyRow() {
+            const container = document.getElementById('policy-container');
+            document.getElementById('empty-policy-msg').style.display = 'none';
+            const id = Date.now();
+            const div = document.createElement('div');
+            div.className = "bg-slate-50 p-3 rounded-lg border border-slate-200 relative fade-in policy-row mb-2";
+            div.id = `pol-${id}`;
+            div.innerHTML = `
+                <button type="button" onclick="removePolicy('${id}')" class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                <div class="grid grid-cols-1 gap-2 pr-6">
+                    <select class="inp-field text-sm pol-type"><option value="" disabled selected>เลือกประเภทประกัน</option>${insuranceTypes.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" class="inp-field text-sm pol-sum" placeholder="ทุนประกัน (บังคับ)" oninput="validateNumber(this)">
+                        <input type="number" class="inp-field text-sm pol-prem" placeholder="เบี้ยต่อปี" oninput="validateNumber(this)">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removePolicy(id) {
+            document.getElementById(`pol-${id}`).remove();
+            if(document.getElementById('policy-container').children.length === 0) document.getElementById('empty-policy-msg').style.display = 'block';
+        }
+
+        function clearForm() {
+            document.getElementById('form-customer').reset();
+            document.getElementById('policy-container').innerHTML = '';
+            document.getElementById('child-details-container').innerHTML = '';
+            document.getElementById('empty-policy-msg').style.display = 'block';
+            document.getElementById('sec-biz').classList.add('hidden');
+            document.getElementById('displayYearly').innerText = '0';
+        }
+
+        // --- 4. CORE LOGIC: DATA GATHERING ---
+        function gatherCustomerData() {
+            const d = {
+                name: document.getElementById('custName').value,
+                age: parseFloat(document.getElementById('custAge').value),
+                gender: document.getElementById('custGender').value,
+                job: document.getElementById('custJob').value,
+                mIncome: parseFloat(document.getElementById('custIncome').value)||0,
+                welfare: document.getElementById('custWelfare').value,
+                welfareAmt: parseFloat(document.getElementById('welfareAmount').value)||0,
+                bizType: document.getElementById('bizType').value,
+                bizProfit: parseFloat(document.getElementById('bizProfit').value)||0,
+                status: document.getElementById('famStatus').value,
+                role: document.getElementById('incomeRole').value,
+                childCount: parseFloat(document.getElementById('childCount').value)||0,
+                hasDep: document.querySelector('input[name="hasDependent"]:checked').value === 'yes',
+                savingCASA: parseFloat(document.getElementById('finSavingCASA').value)||0,
+                savingFixed: parseFloat(document.getElementById('finSavingFixed').value)||0,
+                investStock: parseFloat(document.getElementById('finInvestStock').value)||0,
+                investFund: parseFloat(document.getElementById('finInvestFund').value)||0,
+                debt: {
+                    home: parseFloat(document.getElementById('debtHome').value)||0,
+                    car: parseFloat(document.getElementById('debtCar').value)||0,
+                    personal: parseFloat(document.getElementById('debtPersonal').value)||0
+                }
+            };
+            
+            d.yIncome = (d.mIncome * 12) + d.bizProfit;
+            d.totalDebt = d.debt.home + d.debt.car + d.debt.personal;
+            d.totalAsset = d.savingCASA + d.savingFixed + d.investStock + d.investFund;
+            d.netWorth = d.totalAsset - d.totalDebt;
+            d.liquid = d.savingCASA + d.savingFixed;
+
+            const polRows = document.querySelectorAll('.policy-row');
+            let sums = { life:0, health:0, ci:0, pa:0, pens:0 };
+            polRows.forEach(row => {
+                const type = row.querySelector('.pol-type').value;
+                const sum = parseFloat(row.querySelector('.pol-sum').value)||0;
+                if(type && type.includes('ชีวิต') || type.includes('สะสมทรัพย์')) sums.life += sum;
+                if(type && type.includes('สุขภาพ')) sums.health += sum;
+                if(type && type.includes('โรคร้ายแรง')) sums.ci += sum;
+                if(type && type.includes('บำนาญ')) sums.pens += sum;
+            });
+            d.sums = sums;
+
+            let childrenStudying = 0;
+            document.querySelectorAll('.child-status').forEach(sel => { if(sel.value === 'studying') childrenStudying++; });
+            d.childrenStudying = childrenStudying;
+
+            return d;
+        }
+
+        function calculateMathStats(d) {
+            let debtRatio = d.yIncome > 0 ? (d.totalDebt / d.yIncome) * 100 : 0;
+            let monthlyExp = d.mIncome * 0.7;
+            let liqMonths = monthlyExp > 0 ? d.liquid / monthlyExp : 0;
+            
+            let yieldSuggestion = false;
+            if (d.savingCASA > 0 && d.savingFixed > 0) { if (d.savingCASA > (d.savingFixed * 3)) yieldSuggestion = true; } 
+            else if (d.savingCASA > 500000 && d.savingFixed === 0) { yieldSuggestion = true; }
+
+            let riskAppetite = 'Conservative';
+            const totalInvest = d.investStock + d.investFund;
+            if (totalInvest > 0) {
+                if ((d.investStock / totalInvest) > 0.6) riskAppetite = 'Aggressive';
+                else riskAppetite = 'Moderate';
+            }
+            appState.stats = { debtRatio, liqMonths, yieldSuggestion, riskAppetite };
+        }
+
+        // --- 5. MAIN ANALYSIS FLOW ---
+        async function startAnalysis() {
+            // Validation
+            if (!document.getElementById('custName').value || !document.getElementById('custAge').value || !document.getElementById('custIncome').value) {
+                Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกข้อมูลสำคัญ (ชื่อ, อายุ, รายได้) ให้ครบถ้วน' });
+                return;
+            }
+            
+            let policyValid = true;
+            document.querySelectorAll('.pol-sum').forEach(inp => { if(!inp.value) policyValid = false; });
+            if(!policyValid) {
+                Swal.fire({ icon: 'warning', title: 'ข้อมูลประกันไม่ครบ', text: 'กรุณาระบุทุนประกันสำหรับทุกกรมธรรม์ที่เพิ่ม' });
+                return;
+            }
+
+            navTo('processing');
+
+            try {
+                // 1. Gather Data
+                const d = gatherCustomerData();
+                appState.cust = d;
+                calculateMathStats(d);
+
+                // 2. Call Edge Function
+                const result = await callEdgeFunction(d);
+                
+                // 3. Map Result
+                mapAIResultToLegacyFormat(result, d);
+
+            } catch (error) {
+                console.warn("Using fallback logic:", error);
+                const d = appState.cust || gatherCustomerData();
+                performLegacyAnalysis(d);
+            }
+
+            // 4. Render
+            navTo('dashboard');
+            renderDashboard();
+            generateRadarChart();
+        }
+
+        // --- 6. EDGE FUNCTION CALL ---
+        async function callEdgeFunction(data) {
+            try {
+                const response = await fetch(SUPABASE_EDGE_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                const json = await response.json();
+                
+                // Validate structure
+                if (json.risks && Array.isArray(json.risks) && json.recommendations) {
+                    return json;
+                } else {
+                    throw new Error("Invalid response format");
+                }
+            } catch (e) {
+                throw e;
+            }
+        }
+
+        function mapAIResultToLegacyFormat(aiResult, d) {
+            const levelMap = { 'Low': 20, 'Medium': 50, 'High': 80, 'Critical': 95 };
+            const riskMap = {
+                'Income Protection': 'Income Protection',
+                'Health Coverage': 'Health Coverage',
+                'Retirement Wealth': 'Retirement Wealth',
+                'Debt Management': 'Debt Management',
+                'Liquidity': 'Liquidity'
+            };
+
+            let risks = [];
+            Object.keys(riskMap).forEach(key => {
+                const found = aiResult.risks.find(r => r.type === key);
+                if (found) {
+                    risks.push({
+                        name: key,
+                        score: levelMap[found.level] || 50,
+                        desc: found.reason
+                    });
+                } else {
+                    risks.push({ name: key, score: 20, desc: 'Not evaluated' });
+                }
+            });
+
+            appState.risks = risks;
+            appState.aiStrategies = aiResult.recommendations;
+        }
+
+        // --- 7. FALLBACK LOGIC ---
+        function performLegacyAnalysis(d) {
+            appState.cust = d;
+            calculateMathStats(d);
+            let risks = [];
+
+            // 1. Income
+            let incScore = 20;
+            if(d.role === 'main') incScore += 30;
+            if(d.childrenStudying > 0) incScore += 20;
+            let incY = d.yIncome > 0 ? d.sums.life / d.yIncome : 0;
+            if(incY < 1) incScore += 30;
+            else if(incY > 3) incScore -= 20;
+            risks.push({ name: 'Income Protection', score: clamp(incScore), desc: 'ความเสี่ยงรายได้ครอบครัว' });
+
+            // 2. Health
+            let hltScore = 20 + (d.age > 40 ? 20 : 0);
+            if(d.welfare === 'ไม่มี' || d.welfare === 'มี - วงเงินต่ำ') hltScore += 30;
+            if(d.sums.health > 500000) hltScore -= 30;
+            risks.push({ name: 'Health Coverage', score: clamp(hltScore), desc: 'ความคุ้มครองสุขภาพ' });
+
+            // 3. Retirement
+            let retScore = 20 + (d.age > 45 ? 30 : 0);
+            let wRatio = d.yIncome > 0 ? d.totalAsset / d.yIncome : 0;
+            if(wRatio < 2) retScore += 30;
+            risks.push({ name: 'Retirement Wealth', score: clamp(retScore), desc: 'ความพร้อมเกษียณ' });
+
+            // 4. Debt
+            let debtScore = 10;
+            if(appState.stats.debtRatio > 50) debtScore = 60;
+            if(appState.stats.debtRatio > 80) debtScore = 90;
+            risks.push({ name: 'Debt Management', score: clamp(debtScore), desc: 'ภาระหนี้สิน' });
+
+            // 5. Liquidity
+            let liqScore = 10;
+            if(appState.stats.liqMonths < 3) liqScore = 60;
+            if(appState.stats.liqMonths < 1) liqScore = 90;
+            risks.push({ name: 'Liquidity', score: clamp(liqScore), desc: 'สภาพคล่อง' });
+
+            appState.risks = risks;
+            appState.aiStrategies = null;
+        }
+
+        function clamp(n) { return Math.min(100, Math.max(0, n)); }
+
+        // --- 8. RENDER ---
+        function renderDashboard() {
+            const d = appState.cust;
+            const r = appState.risks;
+            const s = appState.stats;
+            
+            document.getElementById('res-name').innerText = d.name;
+            document.getElementById('res-meta').innerText = `อายุ ${d.age} ปี | ${d.job}`;
+            document.getElementById('res-asset').innerText = d.totalAsset.toLocaleString();
+            document.getElementById('res-debt').innerText = d.totalDebt.toLocaleString();
+            document.getElementById('res-networth').innerText = d.netWorth.toLocaleString();
+            
+            const avg = Math.round(r.reduce((a,b)=>a+b.score,0)/r.length);
+            document.getElementById('res-score').innerText = avg + '/100';
+
+            const container = document.getElementById('top-risks-container');
+            container.innerHTML = '';
+            const sorted = [...r].sort((a,b)=>b.score - a.score).slice(0,3);
+
+            if(sorted[0].score < 40) {
+                container.innerHTML = '<div class="text-green-600 text-center py-4 bg-green-50 rounded-xl"><i class="fa-solid fa-circle-check text-2xl mb-2"></i><br>สุขภาพการเงินดีเยี่ยม</div>';
+            } else {
+                sorted.forEach(risk => {
+                    let c = 'bg-yellow-400', t = 'Medium';
+                    if(risk.score >= 80) { c = 'bg-red-500'; t = 'Critical'; }
+                    else if(risk.score >= 50) { c = 'bg-orange-500'; t = 'High'; }
+                    container.innerHTML += `
+                        <div class="relative">
+                            <div class="flex justify-between items-end mb-1"><span class="font-bold text-slate-700">${risk.name}</span><span class="text-[10px] px-2 py-0.5 rounded text-white ${c} font-bold shadow-sm">${t}</span></div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden"><div class="${c} h-2.5 rounded-full" style="width: ${risk.score}%"></div></div>
+                            <div class="text-xs text-slate-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-info-circle"></i> ${risk.desc}</div>
+                        </div>`;
+                });
+            }
+
+            // Ratios
+            const dRat = s.debtRatio;
+            let dC = dRat > 50 ? (dRat > 100 ? 'bg-red-500' : 'bg-orange-400') : 'bg-green-500';
+            let dT = dRat > 50 ? (dRat > 100 ? 'Danger' : 'Watch') : 'Safe';
+            document.getElementById('val-debt').innerText = Math.round(dRat) + '%';
+            document.getElementById('bar-debt').className = `${dC} h-2 rounded-full transition-all`;
+            document.getElementById('bar-debt').style.width = Math.min(100, dRat/2) + '%';
+            document.getElementById('badge-debt').innerText = dT;
+            document.getElementById('badge-debt').className = `text-[10px] px-2 py-0.5 rounded font-bold text-white ${dC}`;
+
+            const lMon = s.liqMonths;
+            let lC = lMon < 3 ? (lMon < 1 ? 'bg-red-500' : 'bg-orange-400') : 'bg-green-500';
+            let lT = lMon < 3 ? (lMon < 1 ? 'Critical' : 'Low') : 'Good';
+            document.getElementById('val-liq').innerText = lMon.toFixed(1) + ' เดือน';
+            document.getElementById('bar-liq').className = `${lC} h-2 rounded-full transition-all`;
+            document.getElementById('bar-liq').style.width = Math.min(100, (lMon/6)*100) + '%';
+            document.getElementById('badge-liq').innerText = lT;
+            document.getElementById('badge-liq').className = `text-[10px] px-2 py-0.5 rounded font-bold text-white ${lC}`;
+
+            // Recommendations
+            const recDiv = document.getElementById('recommendation-list');
+            const recHead = recDiv.previousElementSibling;
+            recDiv.innerHTML = '';
+
+            if (appState.aiStrategies && appState.aiStrategies.length > 0) {
+                recHead.innerHTML = '<i class="fa-solid fa-robot text-brand-500"></i> คำแนะนำจาก AI (Gemini)';
+                appState.aiStrategies.forEach(st => {
+                    recDiv.innerHTML += `<div class="flex gap-2 text-sm text-slate-700 bg-white p-2 rounded border border-slate-100 shadow-sm"><i class="fa-solid fa-robot text-brand-500 mt-0.5"></i> <div>${st}</div></div>`;
+                });
+            } else {
+                recHead.innerHTML = '<i class="fa-solid fa-lightbulb text-yellow-500"></i> คำแนะนำเบื้องต้น (Basic)';
+                if(s.yieldSuggestion) recDiv.innerHTML += `<div class="flex gap-2 text-sm text-slate-700 bg-white p-2 rounded border border-slate-100 shadow-sm"><i class="fa-solid fa-chart-line text-brand-500 mt-0.5"></i> <div><b>เพิ่มผลตอบแทน:</b> เงินออมสูง ควรแบ่งลงทุนเพื่อโอกาสรับผลตอบแทนเพิ่ม</div></div>`;
+                if(sorted[0].score >= 50) recDiv.innerHTML += `<div class="flex gap-2 text-sm text-slate-700 bg-white p-2 rounded border border-slate-100 shadow-sm"><i class="fa-solid fa-shield-halved text-brand-500 mt-0.5"></i> <div><b>ปิดความเสี่ยงหลัก:</b> ควรพิจารณาแผนปกป้องความเสี่ยงด้าน ${sorted[0].name} เป็นลำดับแรก</div></div>`;
+            }
+        }
+
+        // --- 9. CHARTS & PDF ---
+        let radarChart = null;
+        function generateRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if(radarChart) radarChart.destroy();
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: appState.risks.map(r => r.name),
+                    datasets: [{
+                        label: 'Risk Score',
+                        data: appState.risks.map(r => r.score),
+                        backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                        borderColor: '#0ea5e9',
+                        pointBackgroundColor: '#0284c7',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false, stepSize: 20 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function backToInput() { navTo('input'); }
+
+        async function generatePDF() {
+            // Force fonts and layout ready
+            await document.fonts.ready;
+            
+            Swal.fire({ 
+                title: 'กำลังสร้างไฟล์ PDF...', 
+                html: 'กรุณารอสักครู่ ระบบกำลังจัดทำรายงาน',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading() 
+            });
+
+            const element = document.getElementById('view-dashboard');
+            
+            // Optimization for Thai text and Mobile
+            const opt = {
+                margin: 5,
+                filename: `CAAS_${appState.cust.name}_${new Date().toISOString().slice(0,10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0,
+                    letterRendering: true, // Fix for Thai vowels
+                    logging: false
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Temporarily resize chart for PDF clarity
+            const chartCanvas = document.getElementById('radarChart');
+            const originalHeight = chartCanvas.style.height;
+            chartCanvas.style.height = '350px';
+            chartCanvas.style.width = '100%';
+
+            try {
+                // Wait for repaint
+                await new Promise(r => setTimeout(r, 800));
+                
+                await html2pdf().set(opt).from(element).save();
+                
+                // Restore
+                chartCanvas.style.height = originalHeight;
+                
+                Swal.close();
+                Swal.fire({ icon: 'success', title: 'ดาวน์โหลดสำเร็จ', timer: 2000, showConfirmButton: false });
+            } catch (error) {
+                console.error(error);
+                chartCanvas.style.height = originalHeight;
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้าง PDF ได้' });
+            }
+        }
     </script>
 </body>
 </html>
+
+

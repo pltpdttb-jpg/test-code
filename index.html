@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบช่วยวิเคราะห์ข้อมูลลูกค้า (Customer Analysis Assistant)</title>
+    <title>ttb trainer task</title>
     
-    <!-- Fonts: Prompt for Thai support -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Libraries -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Prompt for Thai -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Configuration -->
+    <!-- Custom Config -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
-                    colors: {
-                        brand: { 50:'#f0f9ff', 100:'#e0f2fe', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1', 900:'#0c4a6e' },
-                        accent: { 500:'#06b6d4', 600:'#0891b2' }
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
                     },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    colors: {
+                        primary: {
+                            start: '#002d63', /* ttb blue */
+                            end: '#0056b3',
+                        },
+                        status: {
+                            available: '#10b981',
+                            busy: '#ef4444',
+                            partial: '#f59e0b'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 4px 20px -2px rgba(0, 45, 99, 0.15)',
                     }
                 }
             }
@@ -36,1048 +46,816 @@
     </script>
 
     <style>
-        body { background-color: #f8fafc; -webkit-tap-highlight-color: transparent; font-family: 'Prompt', sans-serif; }
+        body { background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .bg-gradient-primary { background: linear-gradient(135deg, #002d63 0%, #0056b3 100%); }
+        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: white; padding-bottom: 80px; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .input-rounded { border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .input-rounded:focus { border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1); outline: none; }
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #002d63; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Animations */
-        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.4s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Form Styling */
-        .inp-label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.35rem; }
-        .inp-field { 
-            width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; 
-            background: #fff; transition: all 0.2s; font-size: 0.95rem; color: #1e293b;
-            appearance: none;
-        }
-        .inp-field:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
-        .inp-field.error { border-color: #ef4444; background-color: #fef2f2; }
-        .error-text { color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: none; }
-        
-        select.inp-field {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-        }
-        option:checked { background-color: #e0f2fe; color: #0284c7; font-weight: bold; }
-
-        .credit-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255,255,255,0.95); border-top: 1px solid #e2e8f0;
-            text-align: center; padding: 0.5rem; z-index: 50;
-            font-size: 0.7rem; color: #64748b; font-weight: 500;
-        }
-        
-        /* Print/PDF Optimization */
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; -webkit-print-color-adjust: exact; }
-            * { font-family: 'Prompt', sans-serif !important; }
-            .shadow-sm, .shadow-lg { box-shadow: none !important; border: 1px solid #ddd; }
-            /* Prevent rendering artifacts in PDF */
-            .text-transparent { color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
-        }
+        /* Calendar Grid */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 10px; cursor: pointer; border: 1px solid transparent; }
+        .cal-cell.empty { background: transparent; cursor: default; }
+        .cal-cell.free { background-color: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .cal-cell.busy { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .cal-cell.partial { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .cal-cell.weekend { background-color: #f1f5f9; color: #94a3b8; }
     </style>
 </head>
-<body class="text-slate-800 h-screen flex flex-col overflow-hidden bg-slate-50">
+<body class="text-slate-700">
 
-    <!-- VIEW 0: SPLASH SCREEN & PASSCODE -->
-    <section id="view-splash" class="absolute inset-0 z-50 bg-gradient-to-br from-brand-700 to-brand-500 flex flex-col items-center justify-center text-white p-6">
-        <div class="text-center slide-up w-full max-w-md">
-            <div class="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl ring-4 ring-white/10">
-                <i class="fa-solid fa-chart-pie text-4xl text-white"></i>
-            </div>
-            <h1 class="text-3xl font-bold mb-2 tracking-tight">Welcome</h1>
-            <p class="text-lg opacity-90 mb-8 font-light">Customer Analysis Assistant System</p>
-            
-            <div id="loading-spinner" class="animate-pulse-slow mb-4 flex flex-col items-center">
-                <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i> 
-                <span class="text-sm font-medium opacity-80">กำลังโหลดระบบ...</span>
-            </div>
+    <!-- CONFIGURATION -->
+    <script>
+        // ==========================================
+        // ⚙️ SETUP: Supabase Configuration
+        // ==========================================
+        const SUPABASE_URL = 'https://zmkwjxgsfjipqlrchjtd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpta3dqeGdzZmppcHFscmNoanRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMDgyMzUsImV4cCI6MjA4NDY4NDIzNX0.P_kxe7Titme5ftHjhRtyON5t6EvM44wmX8to5_u7Ppw';
+        // ==========================================
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
 
-            <!-- Passcode Area -->
-            <div id="passcode-area" class="hidden fade-in w-full px-8">
-                <p class="mb-3 text-sm font-semibold opacity-90">กรุณากรอก Passcode</p>
-                <input type="password" id="passcode-input" class="w-full px-4 py-3 rounded-xl text-slate-800 text-center text-xl tracking-widest font-bold shadow-lg focus:outline-none focus:ring-4 focus:ring-white/30 mb-4 placeholder:text-slate-300 placeholder:font-normal placeholder:tracking-normal" placeholder="" maxlength="10">
-                <button onclick="checkPasscode()" class="w-full bg-white text-brand-600 font-bold py-3.5 rounded-xl shadow-lg hover:bg-brand-50 transition-transform active:scale-95">เข้าสู่ระบบ</button>
-                <p class="mt-8 text-[10px] opacity-60">Powered by PRU Academy [ttb training team]</p>
-            </div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="mobile-container flex flex-col justify-center items-center p-8 bg-white absolute inset-0 z-50">
+        <div class="w-24 h-24 rounded-2xl bg-gradient-primary flex items-center justify-center text-white font-bold text-4xl shadow-glow mb-6">
+            TS
         </div>
-    </section>
+        <h2 class="text-2xl font-bold text-slate-800 mb-1">ttb trainer task</h2>
+        <p class="text-slate-400 text-sm mb-8">กรุณาเข้าสู่ระบบ</p>
 
-    <!-- HEADER -->
-    <header id="main-header" class="hidden bg-white shadow-sm z-40 shrink-0 border-b border-slate-100 sticky top-0">
-        <div class="px-4 py-3 flex justify-between items-center max-w-6xl mx-auto">
+        <form id="login-form" class="w-full space-y-4">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1 ml-1">Email</label>
+                <input type="email" id="email" required class="input-rounded w-full px-4 py-3 bg-slate-50 text-sm" placeholder="user@ttb.com">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1 ml-1">Password</label>
+                <input type="password" id="password" required class="input-rounded w-full px-4 py-3 bg-slate-50 text-sm" placeholder="••••••••">
+            </div>
+            <button type="submit" class="w-full bg-gradient-primary text-white font-semibold py-3.5 rounded-xl shadow-glow active:scale-95 transition-transform mt-2">
+                เข้าสู่ระบบ
+            </button>
+            <div id="login-error" class="text-red-500 text-xs text-center hidden mt-2"></div>
+        </form>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div id="app" class="mobile-container relative hidden">
+        
+        <!-- Header -->
+        <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 px-5 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center shadow-md shadow-brand-500/20 text-white">
-                    <i class="fa-solid fa-chart-simple text-sm"></i>
+                <div class="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-glow">
+                    <i class="fa-solid fa-chalkboard-user"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-base leading-tight text-slate-800">CAAS AI</h1>
-                    <p class="text-[10px] text-slate-500 font-medium">Professional Assistant</p>
+                    <h1 class="font-bold text-lg text-slate-800 tracking-tight leading-tight">ttb trainer</h1>
+                    <div class="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                        <span id="current-date">...</span>
+                    </div>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <div id="user-display" class="hidden md:flex flex-col items-end mr-2 text-right">
-                    <span class="text-xs font-bold text-slate-700" id="header-emp-job">Guest</span>
-                    <span class="text-[10px] text-slate-400" id="header-emp-zone">-</span>
-                </div>
-                <button onclick="resetSystem()" class="text-slate-400 hover:text-red-500 transition-colors px-2 py-1" title="Logout">
-                    <i class="fa-solid fa-power-off"></i>
+            <button onclick="logout()" class="text-slate-300 hover:text-red-500 transition-colors">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="p-5 space-y-6">
+            <!-- Content Injected via JS -->
+        </main>
+
+        <!-- FAB (Add Button) -->
+        <button onclick="navigateTo('create')" id="fab-add" class="fixed bottom-24 right-5 w-14 h-14 bg-gradient-primary rounded-full shadow-glow text-white flex items-center justify-center text-xl z-30 hover:scale-105 transition-transform active:scale-95">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+        <!-- Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-2 z-50 max-w-[480px] mx-auto">
+            <div class="flex justify-around items-center">
+                <button onclick="navigateTo('dashboard')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="dashboard">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button onclick="navigateTo('schedules')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="schedules">
+                    <i class="fa-regular fa-calendar-days text-lg"></i>
+                    <span class="text-[10px] font-medium">ตาราง</span>
+                </button>
+                <button onclick="navigateTo('availability')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="availability">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    <span class="text-[10px] font-medium">วันว่าง</span>
+                </button>
+                <button onclick="navigateTo('profile')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="profile">
+                    <i class="fa-regular fa-user text-lg"></i>
+                    <span class="text-[10px] font-medium">ฉัน</span>
                 </button>
             </div>
-        </div>
-    </header>
+        </nav>
+    </div>
 
-    <!-- MAIN CONTAINER -->
-    <main id="main-container" class="flex-1 overflow-y-auto relative pb-12 hidden scroll-smooth">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[60] flex items-center justify-center hidden">
+        <div class="loader"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // STATE MANAGEMENT
+        // ==========================================
+        let currentUser = null;
+        let userProfile = null;
+        let allProfiles = [];
+        let schedulesCache = [];
+        let currentView = 'dashboard';
+
+        // ==========================================
+        // AUTH & INIT
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initApp();
+            
+            // Login Form Listener
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                await login(email, password);
+            });
+
+            // Date Clock
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('current-date').textContent = 
+                    now.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: '2-digit' }) + 
+                    ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute:'2-digit' });
+            }, 1000);
+        });
+
+        async function initApp() {
+            showLoading(true);
+            try {
+                // Check Session
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) throw error;
+
+                if (session) {
+                    await loadUserData(session.user);
+                    showApp();
+                } else {
+                    document.getElementById('login-screen').classList.remove('hidden');
+                    document.getElementById('app').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Init Error:", err);
+                // Fallback to login screen on error
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app').classList.add('hidden');
+            } finally {
+                // IMPORTANT: Always hide loader
+                showLoading(false);
+            }
+        }
+
+        async function login(email, password) {
+            showLoading(true);
+            const errDiv = document.getElementById('login-error');
+            errDiv.classList.add('hidden');
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                
+                if (error) throw error;
+                
+                await loadUserData(data.user);
+                showApp();
+            } catch (error) {
+                console.error("Login Error:", error);
+                errDiv.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือระบบขัดข้อง';
+                errDiv.classList.remove('hidden');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function logout() {
+            try {
+                await supabase.auth.signOut();
+            } catch (e) { console.error(e); }
+            window.location.reload();
+        }
+
+        async function loadUserData(user) {
+            currentUser = user;
+            try {
+                // Fetch Current Profile
+                const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                
+                if (error) {
+                    console.error("Fetch Profile Error:", error);
+                    // Handle case where profile might not exist yet (though it should)
+                    userProfile = { display_name: user.email.split('@')[0], role: 'Trainer', team: 'Unknown' }; 
+                } else {
+                    userProfile = profile;
+                }
+
+                // Fetch All Profiles (For selection/display)
+                const { data: profiles } = await supabase.from('profiles').select('*').order('display_name');
+                allProfiles = profiles || [];
+
+                // Fetch Schedules
+                await refreshSchedules();
+            } catch (e) {
+                console.error("Load User Data Error:", e);
+                throw e; // Propagate error to initApp/login catch block
+            }
+        }
+
+        async function refreshSchedules() {
+            const { data, error } = await supabase.from('schedules')
+                .select('*, profiles:trainer_id(display_name, avatar_url, team)')
+                .order('date', { ascending: true });
+            
+            if (error) console.error("Fetch Schedules Error:", error);
+            schedulesCache = data || [];
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            navigateTo('dashboard');
+        }
+
+        function showLoading(show) {
+            const el = document.getElementById('loading-overlay');
+            if (show) el.classList.remove('hidden'); else el.classList.add('hidden');
+        }
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
+        function navigateTo(view, params = null) {
+            currentView = view;
+            
+            // Update Nav Icons
+            document.querySelectorAll('.nav-item').forEach(el => {
+                const isActive = el.dataset.target === view;
+                const icon = el.querySelector('i');
+                const text = el.querySelector('span');
+                
+                if (isActive) {
+                    icon.className = icon.className.replace('text-slate-400', 'text-blue-600'); // Simple replacement
+                    icon.classList.remove('fa-regular');
+                    if(!icon.classList.contains('fa-solid')) icon.classList.add('fa-solid');
+                    text.classList.remove('text-slate-400');
+                    text.classList.add('text-blue-600');
+                } else {
+                    icon.className = icon.className.replace('text-blue-600', 'text-slate-400');
+                    text.classList.add('text-slate-400');
+                    text.classList.remove('text-blue-600');
+                }
+            });
+
+            // Toggle FAB
+            const fab = document.getElementById('fab-add');
+            if (['create', 'profile', 'availability'].includes(view)) fab.classList.add('hidden');
+            else fab.classList.remove('hidden');
+
+            renderView(view, params);
+        }
+
+        function renderView(view, params) {
+            const container = document.getElementById('main-content');
+            container.innerHTML = '';
+
+            switch(view) {
+                case 'dashboard': renderDashboard(container); break;
+                case 'schedules': renderSchedules(container); break;
+                case 'create': renderCreate(container, params); break;
+                case 'availability': renderAvailability(container); break;
+                case 'profile': renderProfile(container); break;
+            }
+        }
+
+        // ==========================================
+        // VIEWS
+        // ==========================================
         
-        <!-- VIEW 1: EMP LOGIN -->
-        <section id="view-login" class="min-h-full flex flex-col items-center justify-center p-6 slide-up">
-            <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
-                <div class="text-center mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">ระบุข้อมูลพนักงาน</h2>
-                    <p class="text-xs text-slate-500 mt-1">เพื่อบันทึกสถิติการใช้งานระบบ</p>
+        // --- DASHBOARD ---
+        function renderDashboard(container) {
+            const today = new Date().toISOString().split('T')[0];
+            const myTasks = schedulesCache.filter(s => s.date === today && s.trainer_id === currentUser.id);
+            const allTasksToday = schedulesCache.filter(s => s.date === today);
+            
+            const displayTasks = (userProfile.role === 'Trainer') ? myTasks : allTasksToday;
+
+            container.innerHTML = `
+                <div class="bg-gradient-primary rounded-2xl p-6 text-white shadow-glow mb-6 fade-in">
+                    <h2 class="text-xl font-bold">สวัสดี, ${userProfile.display_name}</h2>
+                    <p class="text-blue-100 text-sm opacity-80">${userProfile.team} | ${userProfile.role}</p>
+                    <div class="mt-4 flex gap-4">
+                        <div>
+                            <span class="text-2xl font-bold">${displayTasks.length}</span>
+                            <span class="text-xs opacity-70 block">งานวันนี้</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center px-1 mb-2 fade-in">
+                    <h3 class="font-bold text-slate-700">รายการวันนี้</h3>
+                    ${displayTasks.length === 0 ? '' : '<span class="text-xs text-slate-400">ล่าสุด</span>'}
+                </div>
+
+                <div class="space-y-3 fade-in">
+                    ${displayTasks.length === 0 ? 
+                        `<div class="text-center py-10 text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">ไม่มีตารางงานวันนี้</div>` : 
+                        displayTasks.map(task => renderTaskCard(task)).join('')
+                    }
+                </div>
+            `;
+        }
+
+        // --- SCHEDULE LIST ---
+        function renderSchedules(container) {
+            // Group by date
+            const grouped = {};
+            schedulesCache.forEach(task => {
+                if (!grouped[task.date]) grouped[task.date] = [];
+                grouped[task.date].push(task);
+            });
+            const dates = Object.keys(grouped).sort();
+
+            let html = `<div class="pb-20 fade-in">`;
+            if (dates.length === 0) {
+                html += `<div class="text-center py-20 text-slate-400">ไม่มีข้อมูลตารางงานในระบบ</div>`;
+            } else {
+                dates.forEach(date => {
+                    const d = new Date(date);
+                    const dateDisplay = d.toLocaleDateString('th-TH', { weekday:'short', day:'numeric', month:'short' });
+                    html += `<div class="sticky top-[73px] bg-slate-50/95 py-2 px-1 z-10 text-xs font-bold text-slate-400 mt-2">${dateDisplay}</div>`;
+                    html += `<div class="space-y-3">`;
+                    grouped[date].forEach(task => { html += renderTaskCard(task); });
+                    html += `</div>`;
+                });
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderTaskCard(task) {
+            const isOnline = task.method === 'Online';
+            const audienceColor = task.audience === 'ttb' ? 'bg-blue-600' : 
+                                  task.audience === 'PD ttb' || task.audience === 'PRU' ? 'bg-red-500' : 
+                                  'bg-green-500';
+            
+            return `
+                <div class="bg-white p-4 rounded-xl shadow-soft border border-slate-100 relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-1 self-stretch rounded-full ${audienceColor}"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500">${task.audience}</span>
+                                <span class="text-xs font-bold text-blue-600">${task.start_time.slice(0,5)}</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-slate-800 truncate">${task.course_detail}</h4>
+                            <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-${isOnline ? 'video' : 'location-dot'}"></i> ${isOnline ? 'Online' : task.location}</span>
+                                <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                <span class="truncate max-w-[100px]">${task.profiles?.display_name || 'Unknown'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${(userProfile.role === 'Master' || userProfile.role === 'Admin' || task.trainer_id === currentUser.id) ? 
+                        `<button onclick="deleteTask('${task.id}')" class="absolute top-2 right-2 p-2 text-slate-200 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
+                </div>
+            `;
+        }
+
+        // --- CREATE TASK ---
+        function renderCreate(container, params) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Trainer Options: Only Admin/Master can select others
+            let trainerSelect = '';
+            if (['Master', 'Admin'].includes(userProfile.role)) {
+                trainerSelect = `
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">เทรนเนอร์ (เลือกได้หลายคน)</label>
+                        <select id="c-trainers" multiple class="input-rounded w-full px-4 py-3 bg-white text-sm h-32">
+                            ${allProfiles.filter(p => p.role !== 'Master').map(p => `<option value="${p.id}" selected>${p.display_name}</option>`).join('')}
+                        </select>
+                        <div class="text-[10px] text-slate-400 mt-1 text-right">กด Ctrl/Cmd ค้างเพื่อเลือกหลายคน</div>
+                    </div>`;
+            } else {
+                trainerSelect = `<input type="hidden" id="c-trainers" value="${currentUser.id}">`;
+            }
+
+            container.innerHTML = `
+                <div class="flex items-center gap-2 mb-4">
+                    <button onclick="navigateTo('dashboard')" class="text-slate-400"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h2 class="text-xl font-bold text-slate-800">สร้างงานใหม่</h2>
                 </div>
                 
-                <form onsubmit="handleEmpLogin(event)" class="space-y-4">
+                <form id="create-form" class="bg-white p-5 rounded-2xl shadow-soft space-y-4">
                     <div>
-                        <label class="inp-label">รหัสพนักงาน (ตัวเลขเท่านั้น)</label>
-                        <input type="text" id="empId" class="inp-field" oninput="validateEmpId(this)" placeholder="ระบุรหัสพนักงาน" required>
-                        <div class="error-text">กรุณากรอกเฉพาะตัวเลข</div>
-                    </div>
-                    <div>
-                        <label class="inp-label">ตำแหน่งงาน</label>
-                        <select id="empJob" class="inp-field" required>
-                            <option value="">เลือกตำแหน่ง</option>
-                            <option value="CFSA">CFSA</option>
-                            <option value="CISA">CISA</option>
-                            <option value="BM">BM</option>
-                            <option value="Wealth">Wealth</option>
-                            <option value="PB">PB</option>
-                            <option value="IS IA">IS IA</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">วันที่</label>
+                        <input type="date" id="c-date" required value="${today}" class="input-rounded w-full px-4 py-3 bg-white text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="inp-label">RH สังกัด</label>
-                            <select id="empRH" class="inp-field" onchange="updateZones()" required>
-                                <option value="">เลือก RH</option>
-                                <option value="RH1">RH1</option><option value="RH2">RH2</option>
-                                <option value="RH3">RH3</option><option value="RH4">RH4</option><option value="RH5">RH5</option>
-                            </select>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">เริ่ม</label>
+                            <input type="time" id="c-start" required value="09:00" class="input-rounded w-full px-4 py-3 bg-white text-sm">
                         </div>
                         <div>
-                            <label class="inp-label">Zone</label>
-                            <select id="empZone" class="inp-field" disabled required>
-                                <option value="">รอเลือก RH</option>
-                            </select>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">ถึง</label>
+                            <input type="time" id="c-end" required value="12:00" class="input-rounded w-full px-4 py-3 bg-white text-sm">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/20 transition-all mt-2">
-                        เข้าสู่เมนูหลัก <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
+                    
+                    ${trainerSelect}
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Audience</label>
+                        <select id="c-audience" class="input-rounded w-full px-4 py-3 bg-white text-sm">
+                            <option value="ttb">ttb</option>
+                            <option value="PD ttb">PD ttb</option>
+                            <option value="PRU">PRU</option>
+                            <option value="Customer">Customer</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">รูปแบบ</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="c-method" value="Online" class="peer sr-only">
+                                <div class="p-2 rounded-lg border text-center text-sm peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-600">Online</div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="c-method" value="f2f" class="peer sr-only" checked>
+                                <div class="p-2 rounded-lg border text-center text-sm peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-600">F2F</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">รายละเอียด</label>
+                        <input type="text" id="c-detail" required placeholder="ชื่อหลักสูตร..." class="input-rounded w-full px-4 py-3 bg-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">สถานที่</label>
+                        <input type="text" id="c-location" required placeholder="@Office" class="input-rounded w-full px-4 py-3 bg-white text-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-primary text-white font-bold py-4 rounded-xl shadow-glow">บันทึก</button>
                 </form>
-            </div>
-        </section>
+            `;
 
-        <!-- VIEW 2: CUSTOMER INPUT -->
-        <section id="view-input" class="hidden max-w-4xl mx-auto p-4 pb-24 fade-in">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <span class="w-1.5 h-6 bg-brand-500 rounded-full"></span> ข้อมูลลูกค้า
-                </h2>
-                <button type="button" onclick="clearForm()" class="text-xs text-red-500 font-medium hover:bg-red-50 px-3 py-1.5 rounded-lg transition border border-red-100">
-                    <i class="fa-solid fa-rotate-left"></i> ล้างค่า
-                </button>
-            </div>
-
-            <form id="form-customer" class="space-y-5">
+            document.getElementById('create-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                showLoading(true);
                 
-                <!-- 1. Profile -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2 text-sm font-bold text-slate-700">
-                        <i class="fa-solid fa-id-card text-brand-500"></i> ข้อมูลส่วนตัว & อาชีพ
-                    </div>
-                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="inp-label">ชื่อ-นามสกุล (สมมติ)</label>
-                            <input type="text" id="custName" class="inp-field" placeholder="เช่น คุณเอ" required>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="inp-label">อายุ (ปี)</label>
-                                <input type="number" id="custAge" class="inp-field" oninput="validateNumber(this)" placeholder="เช่น 35" required>
-                                <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
-                            </div>
-                            <div>
-                                <label class="inp-label">เพศ</label>
-                                <select id="custGender" class="inp-field">
-                                    <option value="Male">ชาย</option><option value="Female">หญิง</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="inp-label">อาชีพ</label>
-                            <select id="custJob" class="inp-field" onchange="toggleBizSection()">
-                                <option value="พนักงานบริษัท">พนักงานบริษัท</option>
-                                <option value="ข้าราชการ">ข้าราชการ/รัฐวิสาหกิจ</option>
-                                <option value="เจ้าของกิจการ">เจ้าของกิจการ</option>
-                                <option value="อาชีพอิสระ">อาชีพอิสระ/ฟรีแลนซ์</option>
-                                <option value="วิชาชีพเฉพาะ">วิชาชีพเฉพาะ (แพทย์/วิศวกร)</option>
-                                <option value="เกษตรกร">เกษตรกร</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="inp-label">รายได้ต่อเดือน (บาท)</label>
-                            <input type="number" id="custIncome" class="inp-field" oninput="validateNumber(this); calcYearly()" placeholder="0" required>
-                            <div class="text-xs text-brand-600 font-semibold mt-1 bg-brand-50 inline-block px-2 py-1 rounded">
-                                รายได้ต่อปีประมาณ: <span id="displayYearly">0</span> บาท
-                            </div>
-                            <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
-                        </div>
-                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="inp-label">สวัสดิการที่มี</label>
-                                <select id="custWelfare" class="inp-field">
-                                    <option value="ไม่มี">ไม่มี/สิทธิพื้นฐาน</option>
-                                    <option value="มี - วงเงินสูง">มี - วงเงินสูง (High)</option>
-                                    <option value="มี - วงเงินกลาง">มี - วงเงินกลาง (Medium)</option>
-                                    <option value="มี - วงเงินต่ำ">มี - วงเงินต่ำ (Low)</option>
-                                    <option value="มี - ทุนประกันต่อปี">มี - จำกัดงบต่อปี</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="inp-label">วงเงินสวัสดิการ (บาท)</label>
-                                <input type="number" id="welfareAmount" class="inp-field" oninput="validateNumber(this)" placeholder="ระบุหากทราบ">
-                                <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                try {
+                    const date = document.getElementById('c-date').value;
+                    const start = document.getElementById('c-start').value;
+                    const end = document.getElementById('c-end').value;
+                    const audience = document.getElementById('c-audience').value;
+                    const method = document.querySelector('input[name="c-method"]:checked').value;
+                    const detail = document.getElementById('c-detail').value;
+                    const loc = document.getElementById('c-location').value;
+                    
+                    // Get Trainers
+                    let trainerIds = [];
+                    const trainerEl = document.getElementById('c-trainers');
+                    if (trainerEl.tagName === 'SELECT') {
+                        trainerIds = Array.from(trainerEl.selectedOptions).map(o => o.value);
+                    } else {
+                        trainerIds = [trainerEl.value];
+                    }
 
-                <!-- 1.1 Business Specific (Conditional) -->
-                <div id="sec-biz" class="hidden bg-orange-50 rounded-xl shadow-sm border border-orange-200 overflow-hidden">
-                    <div class="px-5 py-3 border-b border-orange-100 flex items-center gap-2 text-sm font-bold text-orange-800">
-                        <i class="fa-solid fa-briefcase"></i> ข้อมูลธุรกิจ (เฉพาะเจ้าของกิจการ)
-                    </div>
-                    <div class="p-5 grid grid-cols-2 gap-4">
-                        <div class="col-span-2"><label class="inp-label">ประเภทธุรกิจ</label><input type="text" id="bizType" class="inp-field" placeholder="ระบุประเภทธุรกิจ"></div>
-                        <div><label class="inp-label">ทุนจดทะเบียน (บาท)</label><input type="number" id="bizCapital" class="inp-field" oninput="validateNumber(this)"></div>
-                        <div><label class="inp-label">กำไรต่อปี (ประมาณการ)</label><input type="number" id="bizProfit" class="inp-field" oninput="validateNumber(this)"></div>
-                    </div>
-                </div>
+                    // Calc Service Hours
+                    const hStart = parseInt(start.split(':')[0]) + parseInt(start.split(':')[1])/60;
+                    const hEnd = parseInt(end.split(':')[0]) + parseInt(end.split(':')[1])/60;
+                    const hours = Math.max(0, hEnd - hStart);
 
-                <!-- 2. Family -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2 text-sm font-bold text-slate-700">
-                        <i class="fa-solid fa-users text-brand-500"></i> ข้อมูลครอบครัว
-                    </div>
-                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="inp-label">สถานภาพ</label>
-                            <select id="famStatus" class="inp-field">
-                                <option value="โสด">โสด</option>
-                                <option value="สมรส">สมรส</option>
-                                <option value="หย่าร้าง">หย่าร้าง/หม้าย</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="inp-label">บทบาทรายได้ในครอบครัว</label>
-                            <select id="incomeRole" class="inp-field">
-                                <option value="main">เป็นเสาหลัก (หารายได้หลัก)</option>
-                                <option value="co">หารายได้ร่วมกัน</option>
-                                <option value="dependent">ไม่มีรายได้/เป็นผู้พึ่งพา</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="inp-label">จำนวนบุตร</label>
-                            <input type="number" id="childCount" class="inp-field" oninput="validateNumber(this); generateChildRows()" placeholder="0">
-                            <div class="error-text">กรุณาระบุตัวเลขเท่านั้น</div>
-                            <div id="child-details-container" class="mt-3 space-y-3"></div>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="inp-label">บุคคลที่ต้องดูแล (พ่อแม่/คนพิการ)</label>
-                            <div class="flex gap-4 mt-2">
-                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-2 rounded border border-slate-200 w-full justify-center has-checked:bg-brand-50 has-checked:border-brand-300 transition-colors">
-                                    <input type="radio" name="hasDependent" value="no" checked class="accent-brand-600 w-4 h-4"> <span>ไม่มี</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-2 rounded border border-slate-200 w-full justify-center has-checked:bg-brand-50 has-checked:border-brand-300 transition-colors">
-                                    <input type="radio" name="hasDependent" value="yes" class="accent-brand-600 w-4 h-4"> <span>มี</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Financial & Debt -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-2 text-sm font-bold text-slate-700">
-                        <i class="fa-solid fa-coins text-brand-500"></i> การเงิน & หนี้สิน
-                    </div>
-                    <div class="p-5 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <label class="inp-label text-brand-600 border-b border-slate-200 pb-1 mb-2">เงินออม (Savings)</label>
-                                <div>
-                                    <label class="inp-label text-xs">เงินฝากออมทรัพย์</label>
-                                    <input type="number" id="finSavingCASA" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
-                                </div>
-                                <div>
-                                    <label class="inp-label text-xs">เงินฝากประจำ</label>
-                                    <input type="number" id="finSavingFixed" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
-                                </div>
-                            </div>
-                            <div class="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <label class="inp-label text-brand-600 border-b border-slate-200 pb-1 mb-2">เงินลงทุน (Investments)</label>
-                                <div>
-                                    <label class="inp-label text-xs">หุ้น (Stocks)</label>
-                                    <input type="number" id="finInvestStock" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
-                                </div>
-                                <div>
-                                    <label class="inp-label text-xs">กองทุนรวม (Funds)</label>
-                                    <input type="number" id="finInvestFund" class="inp-field" oninput="validateNumber(this)" placeholder="บาท">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="border-t border-dashed border-slate-200 pt-4">
-                            <label class="inp-label text-red-500 mb-3 block flex items-center gap-2"><i class="fa-solid fa-receipt"></i> รายละเอียดภาระหนี้สินคงค้าง</label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div><label class="inp-label text-xs">หนี้บ้าน</label><input type="number" id="debtHome" class="inp-field text-sm" placeholder="ยอดคงเหลือ" oninput="validateNumber(this)"></div>
-                                <div><label class="inp-label text-xs">หนี้รถยนต์</label><input type="number" id="debtCar" class="inp-field text-sm" placeholder="ยอดคงเหลือ" oninput="validateNumber(this)"></div>
-                                <div><label class="inp-label text-xs">บัตรเครดิต/สินเชื่อบุคคล</label><input type="number" id="debtPersonal" class="inp-field text-sm" placeholder="ยอดคงเหลือ" oninput="validateNumber(this)"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. Insurance Portfolio -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
-                            <i class="fa-solid fa-shield-heart text-brand-500"></i> ประกันที่มีอยู่
-                        </div>
-                        <button type="button" onclick="addPolicyRow()" class="text-xs bg-white text-brand-600 px-3 py-1.5 rounded shadow-sm hover:bg-brand-50 font-bold border border-brand-100 transition-colors">
-                            <i class="fa-solid fa-plus"></i> เพิ่มกรมธรรม์
-                        </button>
-                    </div>
-                    <div class="p-5">
-                        <div id="policy-container" class="space-y-3">
-                            <!-- Dynamic Rows -->
-                        </div>
-                        <div id="empty-policy-msg" class="text-center text-slate-400 text-sm py-6 border-2 border-dashed border-slate-100 rounded-xl bg-slate-50/50">
-                            <i class="fa-regular fa-folder-open text-xl mb-1"></i><br>
-                            ยังไม่มีข้อมูลกรมธรรม์
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4 pb-12">
-                    <button type="button" onclick="startAnalysis()" class="w-full bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-500/30 text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> ประมวลผลวิเคราะห์ (AI)
-                    </button>
-                </div>
-            </form>
-        </section>
-
-        <!-- VIEW 3: PROCESSING -->
-        <section id="view-processing" class="hidden min-h-full flex flex-col items-center justify-center p-6 bg-white/60 backdrop-blur-md fixed inset-0 z-50">
-            <div class="text-center">
-                <div class="relative w-24 h-24 mx-auto mb-6">
-                    <div class="absolute inset-0 border-4 border-brand-100 rounded-full"></div>
-                    <div class="absolute inset-0 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-                    <i class="fa-solid fa-brain absolute inset-0 flex items-center justify-center text-3xl text-brand-500 animate-pulse"></i>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">AI กำลังวิเคราะห์ข้อมูล...</h3>
-                <p class="text-slate-500 text-sm">กำลังประมวลผลความเสี่ยงและจัดทำคำแนะนำ</p>
-            </div>
-        </section>
-
-        <!-- VIEW 4: DASHBOARD RESULT -->
-        <section id="view-dashboard" class="hidden min-h-full pb-32 fade-in print:pb-0">
-            <!-- Summary Header -->
-            <div class="bg-slate-800 text-white p-6 rounded-b-[2.5rem] shadow-xl mb-6 relative overflow-hidden print:bg-slate-800 print:text-white print:rounded-none">
-                <div class="absolute top-0 right-0 w-40 h-40 bg-brand-500/20 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-                <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h2 id="res-name" class="text-2xl font-bold text-white">คุณลูกค้า</h2>
-                            <p class="text-slate-300 text-sm opacity-90 mt-1" id="res-meta">Age - | Occupation</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Risk Score</div>
-                            <div id="res-score" class="text-4xl font-bold text-brand-400 mt-1">0<span class="text-lg text-slate-500 font-normal">/100</span></div>
-                        </div>
-                    </div>
-                    <!-- Wealth Summary -->
-                    <div class="grid grid-cols-3 gap-3 bg-white/10 rounded-2xl p-4 text-center backdrop-blur-sm border border-white/5 shadow-inner">
-                        <div>
-                            <div class="text-[10px] text-slate-300">สินทรัพย์รวม</div>
-                            <div id="res-asset" class="font-bold text-sm text-green-300 mt-1">0</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-slate-300">หนี้สินรวม</div>
-                            <div id="res-debt" class="font-bold text-sm text-red-300 mt-1">0</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-slate-300">Net Worth</div>
-                            <div id="res-networth" class="font-bold text-sm text-white mt-1">0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="max-w-4xl mx-auto px-4 space-y-6 print:px-8">
-                
-                <!-- Radar Chart -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative print:border-slate-300 print:shadow-none">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-radar text-brand-500"></i> วิเคราะห์ความเสี่ยง 5 ด้าน</h3>
-                    <div class="h-[300px] w-full flex justify-center">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Top Risks -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 print:border-slate-300 print:shadow-none print:break-inside-avoid">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
-                        <i class="fa-solid fa-triangle-exclamation text-orange-500"></i> ความเสี่ยงที่น่ากังวลสูงสุด
-                    </h3>
-                    <div id="top-risks-container" class="space-y-4">
-                        <!-- Dynamic Content -->
-                    </div>
-                </div>
-
-                <!-- Ratios -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 print:break-inside-avoid">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 print:border-slate-300">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-slate-500 uppercase">ภาระหนี้สิน (Debt Ratio)</span>
-                            <span id="badge-debt" class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">-</span>
-                        </div>
-                        <div class="text-2xl font-bold text-slate-800 mb-2" id="val-debt">0%</div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div id="bar-debt" class="bg-brand-500 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 print:border-slate-300">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-slate-500 uppercase">สภาพคล่อง (Liquidity)</span>
-                            <span id="badge-liq" class="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">-</span>
-                        </div>
-                        <div class="text-2xl font-bold text-slate-800 mb-2" id="val-liq">0 เท่า</div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div id="bar-liq" class="bg-brand-500 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AI Recommendations -->
-                <div class="bg-gradient-to-br from-brand-50 to-white p-6 rounded-2xl border border-brand-100 shadow-sm print:border-brand-200 print:break-inside-avoid">
-                    <h3 class="font-bold text-brand-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-lightbulb text-yellow-500"></i> คำแนะนำจากระบบ (AI Suggestion)</h3>
-                    <div id="recommendation-list" class="space-y-3">
-                        <!-- Dynamic Content -->
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Action Bar (Hidden in PDF) -->
-            <div class="fixed bottom-8 w-full px-4 z-30 pointer-events-none no-print">
-                <div class="max-w-4xl mx-auto flex gap-3 pointer-events-auto shadow-2xl rounded-2xl bg-white p-2 border border-slate-100">
-                    <button onclick="backToInput()" class="flex-1 bg-slate-50 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-100 text-sm transition-colors"><i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล</button>
-                    <button onclick="generatePDF()" class="flex-[2] bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 text-sm shadow-lg shadow-slate-500/30 transition-colors"><i class="fa-solid fa-file-pdf"></i> สร้างรายงาน PDF</button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FIXED FOOTER CREDIT -->
-    <div class="credit-footer no-print">
-        Powered by <strong class="text-brand-600">PRU Academy</strong> [ttb training team]
-    </div>
-
-    <!-- SYSTEM SCRIPT -->
-    <script>
-        // --- CONFIGURATION ---
-        const SUPABASE_EDGE_URL = "https://uvlyxomlvdlemobvquku.supabase.co/functions/v1/smooth-endpoint";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bHl4b21sdmRsZW1vYnZxdWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNjgzOTEsImV4cCI6MjA4Mzg0NDM5MX0.IqG4yFU8T_gNl1vZ9Cl6iiCX8na06y_qSWeopg3guSA";
-
-        // --- CONSTANTS ---
-        const rhData = {
-            "RH1": ["Zone จตุจักร", "Zone ธนบุรี", "Zone บางกะปิ", "Zone สาทร", "Zone สุขุมวิท"],
-            "RH2": ["Zone ชลบุรี", "Zone บางนา", "Zone พัทยา", "Zone ระยอง"],
-            "RH3": ["Zone เชียงใหม่", "Zone นครสวรรค์", "Zone นนทบุรี", "Zone พิษณุโลก", "Zone อยุธยา"],
-            "RH4": ["Zone ดอนเมือง", "Zone นครราชสีมา", "Zone สระบุรี", "Zone อุดรธานี", "Zone อุบลราชธานี"],
-            "RH5": ["Zone ภูเก็ต", "Zone ราชบุรี", "Zone สมุทรสาคร", "Zone สุราษฎร์ธานี", "Zone หาดใหญ่"]
-        };
-
-        const insuranceTypes = [
-            "ประกันชีวิต (คุ้มครองตลอดชีพ/ชั่วระยะเวลา)",
-            "ประกันสะสมทรัพย์",
-            "ประกันสุขภาพ (Health)",
-            "ประกันโรคร้ายแรง (CI)",
-            "ประกันอุบัติเหตุ (PA)",
-            "ประกันบำนาญ"
-        ];
-
-        // --- STATE ---
-        let appState = {
-            emp: null,
-            cust: null,
-            risks: [],
-            stats: {},
-            aiStrategies: null
-        };
-
-        // --- INITIALIZATION ---
-        window.onload = function() {
-            setTimeout(() => {
-                document.getElementById('loading-spinner').classList.add('hidden');
-                document.getElementById('passcode-area').classList.remove('hidden');
-                document.getElementById('passcode-input').focus();
-            }, 2000);
-        };
-
-        // --- 1. ACCESS CONTROL ---
-        function checkPasscode() {
-            const input = document.getElementById('passcode-input').value.trim();
-            if (input.toLowerCase() === "mama") {
-                document.getElementById('view-splash').classList.add('hidden');
-                document.getElementById('main-container').classList.remove('hidden');
-                
-                const savedEmp = localStorage.getItem('caas_emp');
-                if(savedEmp) {
-                    appState.emp = JSON.parse(savedEmp);
-                    updateHeader();
-                    navTo('input');
-                } else {
-                    navTo('login');
-                }
-            } else {
-                Swal.fire({ 
-                    icon: 'error', 
-                    title: 'รหัสผ่านไม่ถูกต้อง', 
-                    text: 'กรุณาลองใหม่อีกครั้ง', 
-                    timer: 1500, 
-                    showConfirmButton: false 
-                });
-                document.getElementById('passcode-input').value = '';
-            }
-        }
-
-        // --- NAVIGATION & UI ---
-        function navTo(viewId) {
-            ['login', 'input', 'dashboard', 'processing'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-            const target = document.getElementById(`view-${viewId}`);
-            target.classList.remove('hidden');
-            if(viewId === 'input' || viewId === 'login') target.classList.add('slide-up');
-            if(viewId === 'dashboard') target.classList.add('fade-in');
-            document.getElementById('main-container').scrollTop = 0;
-        }
-
-        function resetSystem() {
-            Swal.fire({
-                title: 'ออกจากระบบ?',
-                text: "ข้อมูลลูกค้าปัจจุบันจะถูกล้าง",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'ระบบไม่บันทึกข้อมูลลูกค้า',
-                        text: 'ข้อมูลทั้งหมดจะถูกลบเพื่อความปลอดภัย',
-                        confirmButtonText: 'ตกลง'
-                    }).then(() => {
-                        localStorage.removeItem('caas_emp');
-                        location.reload();
+                    // Insert Loop
+                    const inserts = trainerIds.map(tid => {
+                        const tProfile = allProfiles.find(p => p.id === tid);
+                        return {
+                            date, start_time: start, end_time: end, audience, method, 
+                            course_detail: detail, location: loc, service_hours: hours,
+                            trainer_id: tid, team_group: tProfile?.team || 'Unknown'
+                        };
                     });
+
+                    const { error } = await supabase.from('schedules').insert(inserts);
+                    
+                    if (error) throw error;
+                    
+                    await refreshSchedules();
+                    navigateTo('schedules');
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                } finally {
+                    showLoading(false);
                 }
             });
         }
 
-        // --- 2. EMPLOYEE HANDLING ---
-        function validateEmpId(input) {
-            input.value = input.value.replace(/[^0-9]/g, '');
-        }
-
-        function updateZones() {
-            const rh = document.getElementById('empRH').value;
-            const zSelect = document.getElementById('empZone');
-            zSelect.innerHTML = '<option value="">เลือก Zone</option>';
-            zSelect.disabled = true;
-            if (rh && rhData[rh]) {
-                zSelect.disabled = false;
-                rhData[rh].forEach(z => zSelect.innerHTML += `<option value="${z}">${z}</option>`);
+        async function deleteTask(id) {
+            if(!confirm('ยืนยันลบรายการนี้?')) return;
+            showLoading(true);
+            try {
+                await supabase.from('schedules').delete().eq('id', id);
+                await refreshSchedules();
+                renderView(currentView); // Rerender
+            } catch (err) {
+                alert('Error deleting task');
+                console.error(err);
+            } finally {
+                showLoading(false);
             }
         }
 
-        function handleEmpLogin(e) {
-            e.preventDefault();
-            const emp = {
-                id: document.getElementById('empId').value,
-                job: document.getElementById('empJob').value,
-                rh: document.getElementById('empRH').value,
-                zone: document.getElementById('empZone').value
-            };
-            appState.emp = emp;
-            localStorage.setItem('caas_emp', JSON.stringify(emp));
-            updateHeader();
-            navTo('input');
+        // --- AVAILABILITY (ADVANCED) ---
+        function renderAvailability(container) {
+            container.innerHTML = `
+                <div class="space-y-4 fade-in">
+                    <h2 class="text-xl font-bold text-slate-800">ค้นหาวันว่าง</h2>
+                    
+                    <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100">
+                        <!-- 1. เลือกกลุ่ม -->
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">1. เลือกกลุ่มเป้าหมาย</label>
+                            <select id="av-scope" class="input-rounded w-full px-3 py-2 bg-slate-50 text-sm mb-2" onchange="toggleAvScope()">
+                                <option value="all">ทุกคน (All Trainers)</option>
+                                <option value="team">รายทีม (Team)</option>
+                                <option value="manual">เลือกเอง (Manual)</option>
+                            </select>
+                            
+                            <div id="av-team-div" class="hidden">
+                                <select id="av-team-sel" class="input-rounded w-full px-3 py-2 bg-slate-50 text-sm">
+                                    <option value="Training Specialist">Training Specialist</option>
+                                    <option value="Mandatory">Mandatory</option>
+                                </select>
+                            </div>
+                            
+                            <div id="av-manual-div" class="hidden">
+                                <select id="av-manual-sel" multiple class="input-rounded w-full px-3 py-2 bg-slate-50 text-sm h-32">
+                                    ${allProfiles.filter(p => p.role !== 'Master').map(p => `<option value="${p.id}">${p.display_name} (${p.user_id_code})</option>`).join('')}
+                                </select>
+                                <div class="text-[10px] text-slate-400 text-right mt-1">กด Ctrl ค้างเพื่อเลือกหลายคน</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. เลือกโหมด -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">2. วิธีการค้นหา</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <button onclick="searchAv('earliest')" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors text-left group">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center mr-3 group-hover:bg-amber-500 group-hover:text-white transition-colors"><i class="fa-solid fa-bolt"></i></div>
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-700">เร็วที่สุด</div>
+                                        <div class="text-[10px] text-slate-400">วันที่ทุกคนว่างพร้อมกัน</div>
+                                    </div>
+                                </button>
+                                
+                                <button onclick="searchAv('month')" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors text-left group">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i class="fa-regular fa-calendar"></i></div>
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-700">ดูทั้งเดือน</div>
+                                        <div class="text-[10px] text-slate-400">ภาพรวมความว่างในเดือนนี้</div>
+                                    </div>
+                                </button>
+                                
+                                <div class="flex items-center gap-2">
+                                    <input type="date" id="av-spec-date" class="input-rounded flex-1 px-3 py-2 text-sm">
+                                    <button onclick="searchAv('specific')" class="w-12 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-colors flex items-center justify-center">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ผลลัพธ์ -->
+                    <div id="av-result" class="space-y-3 pb-20"></div>
+                </div>
+            `;
+            
+            // Set default date to tomorrow
+            const tmr = new Date(); tmr.setDate(tmr.getDate() + 1);
+            document.getElementById('av-spec-date').value = tmr.toISOString().split('T')[0];
         }
 
-        function updateHeader() {
-            document.getElementById('main-header').classList.remove('hidden');
-            document.getElementById('header-emp-job').innerText = appState.emp.job;
-            document.getElementById('header-emp-zone').innerText = `${appState.emp.rh} | ${appState.emp.zone}`;
+        window.toggleAvScope = () => {
+            const val = document.getElementById('av-scope').value;
+            document.getElementById('av-team-div').classList.toggle('hidden', val !== 'team');
+            document.getElementById('av-manual-div').classList.toggle('hidden', val !== 'manual');
         }
 
-        // --- 3. INPUT FORM HANDLING ---
-        function toggleBizSection() {
-            const job = document.getElementById('custJob').value;
-            const bizSec = document.getElementById('sec-biz');
-            job === "เจ้าของกิจการ" ? bizSec.classList.remove('hidden') : bizSec.classList.add('hidden');
-        }
+        window.searchAv = (mode) => {
+            const scope = document.getElementById('av-scope').value;
+            let targetIds = [];
 
-        function validateNumber(input) {
-            const val = parseFloat(input.value);
-            const err = input.nextElementSibling;
-            if (input.value !== "" && isNaN(val)) {
-                input.classList.add('error');
-                if(err && err.classList.contains('error-text')) err.style.display = 'block';
-                input.value = ""; 
+            // 1. Get Target IDs
+            if (scope === 'all') {
+                targetIds = allProfiles.filter(p => p.role !== 'Master').map(p => p.id);
+            } else if (scope === 'team') {
+                const teamName = document.getElementById('av-team-sel').value;
+                targetIds = allProfiles.filter(p => p.team === teamName).map(p => p.id);
             } else {
-                input.classList.remove('error');
-                if(err && err.classList.contains('error-text')) err.style.display = 'none';
+                const opts = document.getElementById('av-manual-sel').selectedOptions;
+                targetIds = Array.from(opts).map(o => o.value);
             }
+
+            if (targetIds.length === 0) { alert('กรุณาเลือกสมาชิกอย่างน้อย 1 คน'); return; }
+
+            const resDiv = document.getElementById('av-result');
+            resDiv.innerHTML = '<div class="text-center py-4"><div class="loader mx-auto"></div></div>';
+
+            // 2. Logic
+            setTimeout(() => {
+                let html = '';
+                
+                if (mode === 'earliest') {
+                    const date = findEarliestDate(targetIds);
+                    if (date) {
+                        const dStr = new Date(date).toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+                        html = `
+                            <div class="bg-green-50 border border-green-200 p-5 rounded-2xl text-center">
+                                <div class="text-xs text-green-600 font-bold uppercase mb-2">เร็วที่สุดที่ว่างพร้อมกัน</div>
+                                <div class="text-2xl font-bold text-green-700">${dStr}</div>
+                                <div class="text-sm text-green-600 mt-1">จากสมาชิก ${targetIds.length} คน</div>
+                            </div>
+                        `;
+                    } else {
+                        html = `<div class="bg-red-50 p-4 rounded-xl text-center text-red-500 text-sm">ไม่พบวันที่ว่างพร้อมกันใน 60 วันข้างหน้า</div>`;
+                    }
+                } 
+                else if (mode === 'month') {
+                    html = renderMonthGrid(targetIds);
+                } 
+                else if (mode === 'specific') {
+                    const date = document.getElementById('av-spec-date').value;
+                    if(!date) { alert('กรุณาเลือกวันที่'); return; }
+                    html = renderSpecificDate(date, targetIds);
+                }
+
+                resDiv.innerHTML = html;
+            }, 300);
         }
 
-        function calcYearly() {
-            const m = parseFloat(document.getElementById('custIncome').value) || 0;
-            const y = m * 12;
-            document.getElementById('displayYearly').innerText = y.toLocaleString();
+        function findEarliestDate(ids) {
+            let d = new Date();
+            d.setDate(d.getDate() + 1); // Start tomorrow
+            for(let i=0; i<60; i++) {
+                if (d.getDay() !== 0 && d.getDay() !== 6) { // Skip weekends
+                    const dateStr = d.toISOString().split('T')[0];
+                    const isBusy = schedulesCache.some(s => s.date === dateStr && ids.includes(s.trainer_id));
+                    if (!isBusy) return dateStr;
+                }
+                d.setDate(d.getDate() + 1);
+            }
+            return null;
         }
 
-        function generateChildRows() {
-            const count = parseInt(document.getElementById('childCount').value) || 0;
-            const container = document.getElementById('child-details-container');
-            container.innerHTML = '';
-            for(let i=1; i<=count; i++) {
-                const row = document.createElement('div');
-                row.className = "grid grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-100 rounded-lg animate-[fadeIn_0.3s_ease-in]";
-                row.innerHTML = `
-                    <div><label class="inp-label text-xs">อายุบุตรคนที่ ${i} (ปี)</label><input type="number" class="inp-field text-sm child-age" placeholder="อายุ" required oninput="validateNumber(this)"></div>
-                    <div><label class="inp-label text-xs">สถานะบุตรคนที่ ${i}</label><select class="inp-field text-sm child-status"><option value="studying">เรียนอยู่</option><option value="working">ทำงานแล้ว</option></select></div>
+        function renderMonthGrid(ids) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            let html = `
+                <div class="bg-white p-4 rounded-2xl shadow-soft">
+                    <h3 class="font-bold text-center mb-4">${now.toLocaleDateString('th-TH', { month:'long', year:'numeric' })}</h3>
+                    <div class="cal-grid mb-4">
+                        <div class="text-center text-[10px] text-slate-400">อา</div>
+                        <div class="text-center text-[10px] text-slate-400">จ</div>
+                        <div class="text-center text-[10px] text-slate-400">อ</div>
+                        <div class="text-center text-[10px] text-slate-400">พ</div>
+                        <div class="text-center text-[10px] text-slate-400">พฤ</div>
+                        <div class="text-center text-[10px] text-slate-400">ศ</div>
+                        <div class="text-center text-[10px] text-slate-400">ส</div>
+            `;
+
+            // Empty slots
+            const firstDay = new Date(year, month, 1).getDay();
+            for(let i=0; i<firstDay; i++) html += `<div class="cal-cell empty"></div>`;
+
+            // Days
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateObj = new Date(year, month, d);
+                const dateStr = dateObj.toISOString().split('T')[0];
+                const dayOfWeek = dateObj.getDay();
+                
+                // Logic
+                const busyCount = ids.filter(id => schedulesCache.some(s => s.date === dateStr && s.trainer_id === id)).length;
+                
+                let statusClass = '';
+                if (dayOfWeek === 0 || dayOfWeek === 6) statusClass = 'weekend';
+                else if (busyCount === 0) statusClass = 'free';
+                else if (busyCount === ids.length) statusClass = 'busy';
+                else statusClass = 'partial';
+
+                html += `
+                    <div class="cal-cell ${statusClass}" onclick="document.getElementById('av-spec-date').value='${dateStr}'; searchAv('specific')">
+                        <div class="font-bold">${d}</div>
+                        ${statusClass !== 'weekend' ? `<div class="text-[8px] opacity-70">${ids.length - busyCount}/${ids.length}</div>` : ''}
+                    </div>
                 `;
-                container.appendChild(row);
             }
+
+            html += `</div>
+                <div class="flex justify-center gap-3 text-[10px]">
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-green-200 rounded"></div> ว่างครบ</div>
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-amber-100 rounded"></div> ว่างบางคน</div>
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-red-100 rounded"></div> ไม่ว่าง</div>
+                </div>
+            </div>`;
+            return html;
         }
 
-        function addPolicyRow() {
-            const container = document.getElementById('policy-container');
-            document.getElementById('empty-policy-msg').style.display = 'none';
-            const id = Date.now();
-            const div = document.createElement('div');
-            div.className = "bg-slate-50 p-3 rounded-lg border border-slate-200 relative fade-in policy-row mb-2";
-            div.id = `pol-${id}`;
-            div.innerHTML = `
-                <button type="button" onclick="removePolicy('${id}')" class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                <div class="grid grid-cols-1 gap-2 pr-6">
-                    <select class="inp-field text-sm pol-type"><option value="" disabled selected>เลือกประเภทประกัน</option>${insuranceTypes.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" class="inp-field text-sm pol-sum" placeholder="ทุนประกัน (บังคับ)" oninput="validateNumber(this)">
-                        <input type="number" class="inp-field text-sm pol-prem" placeholder="เบี้ยต่อปี" oninput="validateNumber(this)">
+        function renderSpecificDate(dateStr, ids) {
+            const dateDisplay = new Date(dateStr).toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long' });
+            
+            const busyList = [];
+            const freeList = [];
+            
+            ids.forEach(id => {
+                const profile = allProfiles.find(p => p.id === id);
+                const task = schedulesCache.find(s => s.date === dateStr && s.trainer_id === id);
+                
+                if (task) busyList.push({ profile, task });
+                else freeList.push(profile);
+            });
+
+            return `
+                <div class="bg-white p-4 rounded-2xl shadow-soft">
+                    <h3 class="font-bold text-center text-slate-800 mb-1">${dateDisplay}</h3>
+                    <div class="text-center text-xs text-slate-400 mb-4">สถานะของกลุ่มที่เลือก (${ids.length} คน)</div>
+
+                    <!-- Free -->
+                    <div class="mb-4">
+                        <div class="text-xs font-bold text-green-600 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-check-circle"></i> ว่าง (${freeList.length})
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            ${freeList.length === 0 ? '<span class="text-xs text-slate-400">- ไม่มีใครว่าง -</span>' : 
+                                freeList.map(p => `<span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg border border-green-100">${p.display_name}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Busy -->
+                    <div>
+                        <div class="text-xs font-bold text-red-500 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-xmark"></i> ติดงาน (${busyList.length})
+                        </div>
+                        <div class="space-y-2">
+                            ${busyList.length === 0 ? '<span class="text-xs text-slate-400">- ไม่มีใครติดงาน -</span>' : 
+                                busyList.map(item => `
+                                    <div class="flex items-center justify-between text-xs p-2 bg-slate-50 rounded-lg border border-slate-100">
+                                        <span class="font-medium text-slate-700">${item.profile.display_name}</span>
+                                        <span class="text-slate-400 truncate max-w-[120px]">${item.task.audience}</span>
+                                    </div>
+                                `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
-            container.appendChild(div);
         }
 
-        function removePolicy(id) {
-            document.getElementById(`pol-${id}`).remove();
-            if(document.getElementById('policy-container').children.length === 0) document.getElementById('empty-policy-msg').style.display = 'block';
-        }
+        // --- PROFILE ---
+        function renderProfile(container) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center pt-8 pb-6 bg-white rounded-2xl shadow-soft mb-6">
+                    <div class="w-24 h-24 rounded-full bg-slate-200 mb-4 flex items-center justify-center text-3xl text-slate-400 overflow-hidden">
+                        ${userProfile.avatar_url ? `<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-user"></i>'}
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800">${userProfile.display_name}</h2>
+                    <p class="text-sm text-slate-500 mb-1">${userProfile.team}</p>
+                    <div class="flex gap-2 text-[10px] text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                        <span>${userProfile.user_id_code || '-'}</span> | <span>${userProfile.role}</span>
+                    </div>
+                </div>
 
-        function clearForm() {
-            document.getElementById('form-customer').reset();
-            document.getElementById('policy-container').innerHTML = '';
-            document.getElementById('child-details-container').innerHTML = '';
-            document.getElementById('empty-policy-msg').style.display = 'block';
-            document.getElementById('sec-biz').classList.add('hidden');
-            document.getElementById('displayYearly').innerText = '0';
-        }
-
-        // --- 4. CORE LOGIC: DATA GATHERING ---
-        function gatherCustomerData() {
-            const d = {
-                name: document.getElementById('custName').value,
-                age: parseFloat(document.getElementById('custAge').value),
-                gender: document.getElementById('custGender').value,
-                job: document.getElementById('custJob').value,
-                mIncome: parseFloat(document.getElementById('custIncome').value)||0,
-                welfare: document.getElementById('custWelfare').value,
-                welfareAmt: parseFloat(document.getElementById('welfareAmount').value)||0,
-                bizType: document.getElementById('bizType').value,
-                bizProfit: parseFloat(document.getElementById('bizProfit').value)||0,
-                status: document.getElementById('famStatus').value,
-                role: document.getElementById('incomeRole').value,
-                childCount: parseFloat(document.getElementById('childCount').value)||0,
-                hasDep: document.querySelector('input[name="hasDependent"]:checked').value === 'yes',
-                savingCASA: parseFloat(document.getElementById('finSavingCASA').value)||0,
-                savingFixed: parseFloat(document.getElementById('finSavingFixed').value)||0,
-                investStock: parseFloat(document.getElementById('finInvestStock').value)||0,
-                investFund: parseFloat(document.getElementById('finInvestFund').value)||0,
-                debt: {
-                    home: parseFloat(document.getElementById('debtHome').value)||0,
-                    car: parseFloat(document.getElementById('debtCar').value)||0,
-                    personal: parseFloat(document.getElementById('debtPersonal').value)||0
-                }
-            };
-            
-            d.yIncome = (d.mIncome * 12) + d.bizProfit;
-            d.totalDebt = d.debt.home + d.debt.car + d.debt.personal;
-            d.totalAsset = d.savingCASA + d.savingFixed + d.investStock + d.investFund;
-            d.netWorth = d.totalAsset - d.totalDebt;
-            d.liquid = d.savingCASA + d.savingFixed;
-
-            const polRows = document.querySelectorAll('.policy-row');
-            let sums = { life:0, health:0, ci:0, pa:0, pens:0 };
-            polRows.forEach(row => {
-                const type = row.querySelector('.pol-type').value;
-                const sum = parseFloat(row.querySelector('.pol-sum').value)||0;
-                if(type && type.includes('ชีวิต') || type.includes('สะสมทรัพย์')) sums.life += sum;
-                if(type && type.includes('สุขภาพ')) sums.health += sum;
-                if(type && type.includes('โรคร้ายแรง')) sums.ci += sum;
-                if(type && type.includes('บำนาญ')) sums.pens += sum;
-            });
-            d.sums = sums;
-
-            let childrenStudying = 0;
-            document.querySelectorAll('.child-status').forEach(sel => { if(sel.value === 'studying') childrenStudying++; });
-            d.childrenStudying = childrenStudying;
-
-            return d;
-        }
-
-        function calculateMathStats(d) {
-            let debtRatio = d.yIncome > 0 ? (d.totalDebt / d.yIncome) * 100 : 0;
-            let monthlyExp = d.mIncome * 0.7;
-            let liqMonths = monthlyExp > 0 ? d.liquid / monthlyExp : 0;
-            
-            let yieldSuggestion = false;
-            if (d.savingCASA > 0 && d.savingFixed > 0) { if (d.savingCASA > (d.savingFixed * 3)) yieldSuggestion = true; } 
-            else if (d.savingCASA > 500000 && d.savingFixed === 0) { yieldSuggestion = true; }
-
-            let riskAppetite = 'Conservative';
-            const totalInvest = d.investStock + d.investFund;
-            if (totalInvest > 0) {
-                if ((d.investStock / totalInvest) > 0.6) riskAppetite = 'Aggressive';
-                else riskAppetite = 'Moderate';
-            }
-            appState.stats = { debtRatio, liqMonths, yieldSuggestion, riskAppetite };
-        }
-
-        // --- 5. MAIN ANALYSIS FLOW ---
-        async function startAnalysis() {
-            // Validation
-            if (!document.getElementById('custName').value || !document.getElementById('custAge').value || !document.getElementById('custIncome').value) {
-                Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกข้อมูลสำคัญ (ชื่อ, อายุ, รายได้) ให้ครบถ้วน' });
-                return;
-            }
-            
-            let policyValid = true;
-            document.querySelectorAll('.pol-sum').forEach(inp => { if(!inp.value) policyValid = false; });
-            if(!policyValid) {
-                Swal.fire({ icon: 'warning', title: 'ข้อมูลประกันไม่ครบ', text: 'กรุณาระบุทุนประกันสำหรับทุกกรมธรรม์ที่เพิ่ม' });
-                return;
-            }
-
-            navTo('processing');
-
-            try {
-                // 1. Gather Data
-                const d = gatherCustomerData();
-                appState.cust = d;
-                calculateMathStats(d);
-
-                // 2. Call Edge Function
-                const result = await callEdgeFunction(d);
-                
-                // 3. Map Result
-                mapAIResultToLegacyFormat(result, d);
-
-            } catch (error) {
-                console.warn("Using fallback logic:", error);
-                const d = appState.cust || gatherCustomerData();
-                performLegacyAnalysis(d);
-            }
-
-            // 4. Render
-            navTo('dashboard');
-            renderDashboard();
-            generateRadarChart();
-        }
-
-        // --- 6. EDGE FUNCTION CALL ---
-        async function callEdgeFunction(data) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000); // 20s
-
-    try {
-        const response = await fetch(SUPABASE_EDGE_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bHl4b21sdmRsZW1vYnZxdWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNjgzOTEsImV4cCI6MjA4Mzg0NDM5MX0.IqG4yFU8T_gNl1vZ9Cl6iiCX8na06y_qSWeopg3guSA"`
-            },
-            body: JSON.stringify(data),
-            signal: controller.signal
-        });
-
-        if (!response.ok) throw new Error(`Server error: ${response.status}`);
-        const json = await response.json();
-
-        if (!json || !json.risks || !json.recommendations) {
-            throw new Error("Invalid AI response");
-        }
-
-        return json;
-    } finally {
-        clearTimeout(timeout);
-    }
-}
-
-        function mapAIResultToLegacyFormat(aiResult, d) {
-    const levelMap = { 'Low': 20, 'Medium': 50, 'High': 80, 'Critical': 95 };
-    const expectedTypes = [
-        'Income Protection',
-        'Health Coverage',
-        'Retirement Wealth',
-        'Debt Management',
-        'Liquidity'
-    ];
-
-    let risks = expectedTypes.map(type => {
-        const found = aiResult.risks?.find(r => r.type === type);
-        return {
-            name: type,
-            score: levelMap[found?.level] ?? 30,
-            desc: found?.reason ?? 'ไม่มีข้อมูลจาก AI'
-        };
-    });
-
-    appState.risks = risks;
-    appState.aiStrategies = Array.isArray(aiResult.recommendations)
-        ? aiResult.recommendations
-        : null;
-}
-
-        // --- 7. FALLBACK LOGIC ---
-        function performLegacyAnalysis(d) {
-            appState.cust = d;
-            calculateMathStats(d);
-            let risks = [];
-
-            // 1. Income
-            let incScore = 20;
-            if(d.role === 'main') incScore += 30;
-            if(d.childrenStudying > 0) incScore += 20;
-            let incY = d.yIncome > 0 ? d.sums.life / d.yIncome : 0;
-            if(incY < 1) incScore += 30;
-            else if(incY > 3) incScore -= 20;
-            risks.push({ name: 'Income Protection', score: clamp(incScore), desc: 'ความเสี่ยงรายได้ครอบครัว' });
-
-            // 2. Health
-            let hltScore = 20 + (d.age > 40 ? 20 : 0);
-            if(d.welfare === 'ไม่มี' || d.welfare === 'มี - วงเงินต่ำ') hltScore += 30;
-            if(d.sums.health > 500000) hltScore -= 30;
-            risks.push({ name: 'Health Coverage', score: clamp(hltScore), desc: 'ความคุ้มครองสุขภาพ' });
-
-            // 3. Retirement
-            let retScore = 20 + (d.age > 45 ? 30 : 0);
-            let wRatio = d.yIncome > 0 ? d.totalAsset / d.yIncome : 0;
-            if(wRatio < 2) retScore += 30;
-            risks.push({ name: 'Retirement Wealth', score: clamp(retScore), desc: 'ความพร้อมเกษียณ' });
-
-            // 4. Debt
-            let debtScore = 10;
-            if(appState.stats.debtRatio > 50) debtScore = 60;
-            if(appState.stats.debtRatio > 80) debtScore = 90;
-            risks.push({ name: 'Debt Management', score: clamp(debtScore), desc: 'ภาระหนี้สิน' });
-
-            // 5. Liquidity
-            let liqScore = 10;
-            if(appState.stats.liqMonths < 3) liqScore = 60;
-            if(appState.stats.liqMonths < 1) liqScore = 90;
-            risks.push({ name: 'Liquidity', score: clamp(liqScore), desc: 'สภาพคล่อง' });
-
-            appState.risks = risks;
-            appState.aiStrategies = null;
-        }
-
-        function clamp(n) { return Math.min(100, Math.max(0, n)); }
-
-        // --- 8. RENDER ---
-        function renderDashboard() {
-            const d = appState.cust;
-            const r = appState.risks;
-            const s = appState.stats;
-            
-            document.getElementById('res-name').innerText = d.name;
-            document.getElementById('res-meta').innerText = `อายุ ${d.age} ปี | ${d.job}`;
-            document.getElementById('res-asset').innerText = d.totalAsset.toLocaleString();
-            document.getElementById('res-debt').innerText = d.totalDebt.toLocaleString();
-            document.getElementById('res-networth').innerText = d.netWorth.toLocaleString();
-            
-            const avg = Math.round(r.reduce((a,b)=>a+b.score,0)/r.length);
-            document.getElementById('res-score').innerText = avg + '/100';
-
-            const container = document.getElementById('top-risks-container');
-            container.innerHTML = '';
-            const sorted = [...r].sort((a,b)=>b.score - a.score).slice(0,3);
-
-            if(sorted[0].score < 40) {
-                container.innerHTML = '<div class="text-green-600 text-center py-4 bg-green-50 rounded-xl"><i class="fa-solid fa-circle-check text-2xl mb-2"></i><br>สุขภาพการเงินดีเยี่ยม</div>';
-            } else {
-                sorted.forEach(risk => {
-                    let c = 'bg-yellow-400', t = 'Medium';
-                    if(risk.score >= 80) { c = 'bg-red-500'; t = 'Critical'; }
-                    else if(risk.score >= 50) { c = 'bg-orange-500'; t = 'High'; }
-                    container.innerHTML += `
-                        <div class="relative">
-                            <div class="flex justify-between items-end mb-1"><span class="font-bold text-slate-700">${risk.name}</span><span class="text-[10px] px-2 py-0.5 rounded text-white ${c} font-bold shadow-sm">${t}</span></div>
-                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden"><div class="${c} h-2.5 rounded-full" style="width: ${risk.score}%"></div></div>
-                            <div class="text-xs text-slate-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-info-circle"></i> ${risk.desc}</div>
-                        </div>`;
-                });
-            }
-
-            // Ratios
-            const dRat = s.debtRatio;
-            let dC = dRat > 50 ? (dRat > 100 ? 'bg-red-500' : 'bg-orange-400') : 'bg-green-500';
-            let dT = dRat > 50 ? (dRat > 100 ? 'Danger' : 'Watch') : 'Safe';
-            document.getElementById('val-debt').innerText = Math.round(dRat) + '%';
-            document.getElementById('bar-debt').className = `${dC} h-2 rounded-full transition-all`;
-            document.getElementById('bar-debt').style.width = Math.min(100, dRat/2) + '%';
-            document.getElementById('badge-debt').innerText = dT;
-            document.getElementById('badge-debt').className = `text-[10px] px-2 py-0.5 rounded font-bold text-white ${dC}`;
-
-            const lMon = s.liqMonths;
-            let lC = lMon < 3 ? (lMon < 1 ? 'bg-red-500' : 'bg-orange-400') : 'bg-green-500';
-            let lT = lMon < 3 ? (lMon < 1 ? 'Critical' : 'Low') : 'Good';
-            document.getElementById('val-liq').innerText = lMon.toFixed(1) + ' เดือน';
-            document.getElementById('bar-liq').className = `${lC} h-2 rounded-full transition-all`;
-            document.getElementById('bar-liq').style.width = Math.min(100, (lMon/6)*100) + '%';
-            document.getElementById('badge-liq').innerText = lT;
-            document.getElementById('badge-liq').className = `text-[10px] px-2 py-0.5 rounded font-bold text-white ${lC}`;
-
-            // Recommendations
-            const recDiv = document.getElementById('recommendation-list');
-            const recHead = recDiv.previousElementSibling;
-            recDiv.innerHTML = '';
-
-            if (appState.aiStrategies && appState.aiStrategies.length > 0) {
-                recHead.innerHTML = '<i class="fa-solid fa-robot text-brand-500"></i> คำแนะนำจาก AI (Gemini)';
-                appState.aiStrategies.forEach(st => {
-                    recDiv.innerHTML += `<div class="flex gap-2 text-sm text-slate-700 bg-white p-2 rounded border border-slate-100 shadow-sm"><i class="fa-solid fa-robot text-brand-500 mt-0.5"></i> <div>${st}</div></div>`;
-                });
-            } else {
-                recHead.innerHTML = '<i class="fa-solid fa-lightbulb text-yellow-500"></i> คำแนะนำเบื้องต้น (Basic)';
-                if(s.yieldSuggestion) recDiv.innerHTML += `<div class="flex gap-2 text-sm text-slate-700 bg-white p-2 rounded border border-slate-100 shadow-sm"><i class="fa-solid fa-chart-line text-brand-500 mt-0.5"></i> <div><b>เพิ่มผลตอบแทน:</b> เงินออมสูง ควรแบ่งลงทุนเพื่อโอกาสรับผลตอบแทนเพิ่ม</div></div>`;
-                if(sorted[0].score >= 50) recDiv.innerHTML += `<div class="flex gap-2 text-sm text-slate-700 bg-white p-2 rounded border border-slate-100 shadow-sm"><i class="fa-solid fa-shield-halved text-brand-500 mt-0.5"></i> <div><b>ปิดความเสี่ยงหลัก:</b> ควรพิจารณาแผนปกป้องความเสี่ยงด้าน ${sorted[0].name} เป็นลำดับแรก</div></div>`;
-            }
-        }
-
-        // --- 9. CHARTS & PDF ---
-        let radarChart = null;
-        function generateRadarChart() {
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            if(radarChart) radarChart.destroy();
-            radarChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: appState.risks.map(r => r.name),
-                    datasets: [{
-                        label: 'Risk Score',
-                        data: appState.risks.map(r => r.score),
-                        backgroundColor: 'rgba(14, 165, 233, 0.2)',
-                        borderColor: '#0ea5e9',
-                        pointBackgroundColor: '#0284c7',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false, stepSize: 20 } } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        function backToInput() { navTo('input'); }
-
-        async function generatePDF() {
-            // Force fonts and layout ready
-            await document.fonts.ready;
-            
-            Swal.fire({ 
-                title: 'กำลังสร้างไฟล์ PDF...', 
-                html: 'กรุณารอสักครู่ ระบบกำลังจัดทำรายงาน',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading() 
-            });
-
-            const element = document.getElementById('view-dashboard');
-            
-            // Optimization for Thai text and Mobile
-            const opt = {
-                margin: 5,
-                filename: `CAAS_${appState.cust.name}_${new Date().toISOString().slice(0,10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true, 
-                    scrollY: 0,
-                    letterRendering: true, // Fix for Thai vowels
-                    logging: false
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Temporarily resize chart for PDF clarity
-            const chartCanvas = document.getElementById('radarChart');
-            const originalHeight = chartCanvas.style.height;
-            chartCanvas.style.height = '350px';
-            chartCanvas.style.width = '100%';
-
-            try {
-                // Wait for repaint
-                await document.fonts.ready;
-await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-await document.fonts.ready;
-await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-await html2pdf().set(opt).from(element).save();
-                
-                // Restore
-                chartCanvas.style.height = originalHeight;
-                
-                Swal.close();
-                Swal.fire({ icon: 'success', title: 'ดาวน์โหลดสำเร็จ', timer: 2000, showConfirmButton: false });
-            } catch (error) {
-                console.error(error);
-                chartCanvas.style.height = originalHeight;
-                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถสร้าง PDF ได้' });
-            }
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+                    <div class="p-4 border-b border-slate-50">
+                        <div class="text-xs text-slate-400 mb-1">Calendar ID</div>
+                        <div class="text-xs bg-slate-50 p-2 rounded text-slate-600 break-all font-mono">${userProfile.calendar_id || 'Not Connected'}</div>
+                    </div>
+                    <button class="w-full p-4 text-left text-sm text-slate-700 hover:bg-slate-50 flex justify-between items-center">
+                        เปลี่ยนรหัสผ่าน <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                    </button>
+                    <button onclick="logout()" class="w-full p-4 text-left text-sm text-red-500 hover:bg-red-50 font-medium flex justify-between items-center">
+                        ออกจากระบบ <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            `;
         }
     </script>
 </body>

@@ -4,158 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ttb trainer task</title>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Prompt for Thai -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Custom Config -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            start: '#002d63', /* ttb blue */
-                            end: '#0056b3',
-                        },
-                        status: {
-                            available: '#10b981',
-                            busy: '#ef4444',
-                            partial: '#f59e0b'
-                        }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'glow': '0 4px 20px -2px rgba(0, 45, 99, 0.15)',
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
-        body { background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f8fafc; font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
         .bg-gradient-primary { background: linear-gradient(135deg, #002d63 0%, #0056b3 100%); }
-        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: white; padding-bottom: 80px; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        .mobile-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: white; padding-bottom: 80px; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         .input-rounded { border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
         .input-rounded:focus { border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1); outline: none; }
         .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #002d63; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Calendar Grid */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 10px; cursor: pointer; border: 1px solid transparent; }
-        .cal-cell.empty { background: transparent; cursor: default; }
-        .cal-cell.free { background-color: #d1fae5; color: #065f46; border-color: #a7f3d0; }
-        .cal-cell.busy { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
-        .cal-cell.partial { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
-        .cal-cell.weekend { background-color: #f1f5f9; color: #94a3b8; }
     </style>
 </head>
-<body class="text-slate-700">
+<body>
 
-    <!-- CONFIGURATION -->
     <script>
-        // ==========================================
-        // ⚙️ SETUP: Supabase Configuration
-        // ==========================================
         const SUPABASE_URL = 'https://zmkwjxgsfjipqlrchjtd.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpta3dqeGdzZmppcHFscmNoanRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMDgyMzUsImV4cCI6MjA4NDY4NDIzNX0.P_kxe7Titme5ftHjhRtyON5t6EvM44wmX8to5_u7Ppw';
-        // ==========================================
-        
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     </script>
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="mobile-container flex flex-col justify-center items-center p-8 bg-white absolute inset-0 z-50">
-        <div class="w-24 h-24 rounded-2xl bg-gradient-primary flex items-center justify-center text-white font-bold text-4xl shadow-glow mb-6">
-            TS
-        </div>
+        <div class="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center text-white font-bold text-3xl shadow-lg mb-6">TS</div>
         <h2 class="text-2xl font-bold text-slate-800 mb-1">ttb trainer task</h2>
-        <p class="text-slate-400 text-sm mb-8">กรุณาเข้าสู่ระบบ</p>
+        <p class="text-slate-400 text-sm mb-8">เข้าใช้งานด้วย Email หรือ User ID</p>
 
         <form id="login-form" class="w-full space-y-4">
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1 ml-1">Email</label>
-                <input type="email" id="email" required class="input-rounded w-full px-4 py-3 bg-slate-50 text-sm" placeholder="user@ttb.com">
+                <label class="block text-xs font-medium text-slate-500 mb-1 ml-1">Email / User ID</label>
+                <input type="text" id="login-id" required class="input-rounded w-full px-4 py-3 bg-slate-50 text-sm" placeholder="เช่น ttb.yc หรือ email@ttb.com">
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1 ml-1">Password</label>
-                <input type="password" id="password" required class="input-rounded w-full px-4 py-3 bg-slate-50 text-sm" placeholder="••••••••">
+                <label class="block text-xs font-medium text-slate-500 mb-1 ml-1">Password (6 หลักขึ้นไป)</label>
+                <input type="password" id="login-password" required class="input-rounded w-full px-4 py-3 bg-slate-50 text-sm" placeholder="••••••••">
             </div>
-            <button type="submit" class="w-full bg-gradient-primary text-white font-semibold py-3.5 rounded-xl shadow-glow active:scale-95 transition-transform mt-2">
+            <button type="submit" class="w-full bg-gradient-primary text-white font-semibold py-3.5 rounded-xl shadow-md active:scale-95 transition-transform mt-2">
                 เข้าสู่ระบบ
             </button>
-            <div id="login-error" class="text-red-500 text-xs text-center hidden mt-2"></div>
+            <div id="login-error" class="text-red-500 text-xs text-center hidden mt-2 p-2 bg-red-50 rounded-lg"></div>
         </form>
     </div>
 
     <!-- APP CONTAINER -->
-    <div id="app" class="mobile-container relative hidden">
-        
-        <!-- Header -->
+    <div id="app" class="mobile-container hidden">
         <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 px-5 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-glow">
-                    <i class="fa-solid fa-chalkboard-user"></i>
-                </div>
+                <div class="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-sm"><i class="fa-solid fa-user-tie"></i></div>
                 <div>
-                    <h1 class="font-bold text-lg text-slate-800 tracking-tight leading-tight">ttb trainer</h1>
-                    <div class="text-[10px] text-slate-500 font-medium flex items-center gap-1">
-                        <span id="current-date">...</span>
-                    </div>
+                    <h1 id="user-display-name" class="font-bold text-sm text-slate-800">...</h1>
+                    <div id="user-role-badge" class="text-[10px] text-blue-600 font-medium">Loading...</div>
                 </div>
             </div>
-            <button onclick="logout()" class="text-slate-300 hover:text-red-500 transition-colors">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
+            <button onclick="handleLogout()" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-power-off"></i></button>
         </header>
 
-        <!-- Main Content -->
         <main id="main-content" class="p-5 space-y-6">
-            <!-- Content Injected via JS -->
+            <!-- Dynamic Content -->
         </main>
 
-        <!-- FAB (Add Button) -->
-        <button onclick="navigateTo('create')" id="fab-add" class="fixed bottom-24 right-5 w-14 h-14 bg-gradient-primary rounded-full shadow-glow text-white flex items-center justify-center text-xl z-30 hover:scale-105 transition-transform active:scale-95">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-
-        <!-- Navigation -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-2 z-50 max-w-[480px] mx-auto">
-            <div class="flex justify-around items-center">
-                <button onclick="navigateTo('dashboard')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="dashboard">
-                    <i class="fa-solid fa-house text-lg"></i>
-                    <span class="text-[10px] font-medium">Home</span>
-                </button>
-                <button onclick="navigateTo('schedules')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="schedules">
-                    <i class="fa-regular fa-calendar-days text-lg"></i>
-                    <span class="text-[10px] font-medium">ตาราง</span>
-                </button>
-                <button onclick="navigateTo('availability')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="availability">
-                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
-                    <span class="text-[10px] font-medium">วันว่าง</span>
-                </button>
-                <button onclick="navigateTo('profile')" class="nav-item flex flex-col items-center gap-1 p-2 w-16" data-target="profile">
-                    <i class="fa-regular fa-user text-lg"></i>
-                    <span class="text-[10px] font-medium">ฉัน</span>
-                </button>
-            </div>
+        <!-- Bottom Nav -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-2 z-50 max-w-[480px] mx-auto flex justify-around">
+            <button onclick="renderDashboard()" class="flex flex-col items-center gap-1 p-2"><i class="fa-solid fa-house"></i><span class="text-[10px]">Home</span></button>
+            <button onclick="renderSchedules()" class="flex flex-col items-center gap-1 p-2"><i class="fa-solid fa-calendar-alt"></i><span class="text-[10px]">ตาราง</span></button>
+            <button onclick="renderCreate()" class="flex flex-col items-center gap-1 p-2 text-blue-600"><i class="fa-solid fa-plus-circle text-2xl"></i></button>
+            <button onclick="renderAvailability()" class="flex flex-col items-center gap-1 p-2"><i class="fa-solid fa-search"></i><span class="text-[10px]">วันว่าง</span></button>
+            <button onclick="renderProfile()" class="flex flex-col items-center gap-1 p-2"><i class="fa-solid fa-user"></i><span class="text-[10px]">ฉัน</span></button>
         </nav>
     </div>
 
@@ -165,700 +82,169 @@
     </div>
 
     <script>
-        // ==========================================
-        // STATE MANAGEMENT
-        // ==========================================
         let currentUser = null;
         let userProfile = null;
-        let allProfiles = [];
-        let schedulesCache = [];
-        let currentView = 'dashboard';
+        let allSchedules = [];
 
-        // ==========================================
-        // AUTH & INIT
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initApp();
-            
-            // Login Form Listener
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                await login(email, password);
-            });
-
-            // Date Clock
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('current-date').textContent = 
-                    now.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: '2-digit' }) + 
-                    ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute:'2-digit' });
-            }, 1000);
-        });
-
-        async function initApp() {
+        async function init() {
             showLoading(true);
-            try {
-                // Check Session
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (error) throw error;
-
-                if (session) {
-                    await loadUserData(session.user);
-                    showApp();
-                } else {
-                    document.getElementById('login-screen').classList.remove('hidden');
-                    document.getElementById('app').classList.add('hidden');
-                }
-            } catch (err) {
-                console.error("Init Error:", err);
-                // Fallback to login screen on error
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('app').classList.add('hidden');
-            } finally {
-                // IMPORTANT: Always hide loader
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                await loadAppData(session.user);
+            } else {
                 showLoading(false);
             }
         }
 
-        async function login(email, password) {
+        async function loadAppData(user) {
+            currentUser = user;
+            const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+            userProfile = profile;
+            
+            document.getElementById('user-display-name').textContent = profile.display_name;
+            document.getElementById('user-role-badge').textContent = `${profile.team} | ${profile.role}`;
+            
+            await refreshSchedules();
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            renderDashboard();
+            showLoading(false);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
             showLoading(true);
+            const loginId = document.getElementById('login-id').value.trim();
+            const password = document.getElementById('login-password').value;
             const errDiv = document.getElementById('login-error');
             errDiv.classList.add('hidden');
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                
+                let email = loginId;
+                // ถ้าไม่ใช่ Email (ไม่มี @) ให้ไปหาจากตาราง profiles
+                if (!loginId.includes('@')) {
+                    const { data: p, error: pErr } = await supabaseClient
+                        .from('profiles')
+                        .select('email')
+                        .eq('user_id_code', loginId)
+                        .single();
+                    if (pErr || !p) throw new Error('ไม่พบ User ID นี้ในระบบ');
+                    email = p.email;
+                }
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                
-                await loadUserData(data.user);
-                showApp();
-            } catch (error) {
-                console.error("Login Error:", error);
-                errDiv.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือระบบขัดข้อง';
+                await loadAppData(data.user);
+            } catch (err) {
+                errDiv.textContent = err.message === 'Invalid login credentials' ? 'รหัสผ่านไม่ถูกต้อง (ต้อง 6 ตัวขึ้นไป)' : err.message;
                 errDiv.classList.remove('hidden');
             } finally {
                 showLoading(false);
             }
         }
 
-        async function logout() {
-            try {
-                await supabase.auth.signOut();
-            } catch (e) { console.error(e); }
-            window.location.reload();
-        }
-
-        async function loadUserData(user) {
-            currentUser = user;
-            try {
-                // Fetch Current Profile
-                const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-                
-                if (error) {
-                    console.error("Fetch Profile Error:", error);
-                    // Handle case where profile might not exist yet (though it should)
-                    userProfile = { display_name: user.email.split('@')[0], role: 'Trainer', team: 'Unknown' }; 
-                } else {
-                    userProfile = profile;
-                }
-
-                // Fetch All Profiles (For selection/display)
-                const { data: profiles } = await supabase.from('profiles').select('*').order('display_name');
-                allProfiles = profiles || [];
-
-                // Fetch Schedules
-                await refreshSchedules();
-            } catch (e) {
-                console.error("Load User Data Error:", e);
-                throw e; // Propagate error to initApp/login catch block
-            }
-        }
-
         async function refreshSchedules() {
-            const { data, error } = await supabase.from('schedules')
-                .select('*, profiles:trainer_id(display_name, avatar_url, team)')
-                .order('date', { ascending: true });
-            
-            if (error) console.error("Fetch Schedules Error:", error);
-            schedulesCache = data || [];
+            const { data } = await supabaseClient.from('schedules').select('*, profiles(display_name)').order('date', {ascending: true});
+            allSchedules = data || [];
         }
 
-        function showApp() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            navigateTo('dashboard');
-        }
-
-        function showLoading(show) {
-            const el = document.getElementById('loading-overlay');
-            if (show) el.classList.remove('hidden'); else el.classList.add('hidden');
-        }
-
-        // ==========================================
-        // NAVIGATION
-        // ==========================================
-        function navigateTo(view, params = null) {
-            currentView = view;
-            
-            // Update Nav Icons
-            document.querySelectorAll('.nav-item').forEach(el => {
-                const isActive = el.dataset.target === view;
-                const icon = el.querySelector('i');
-                const text = el.querySelector('span');
-                
-                if (isActive) {
-                    icon.className = icon.className.replace('text-slate-400', 'text-blue-600'); // Simple replacement
-                    icon.classList.remove('fa-regular');
-                    if(!icon.classList.contains('fa-solid')) icon.classList.add('fa-solid');
-                    text.classList.remove('text-slate-400');
-                    text.classList.add('text-blue-600');
-                } else {
-                    icon.className = icon.className.replace('text-blue-600', 'text-slate-400');
-                    text.classList.add('text-slate-400');
-                    text.classList.remove('text-blue-600');
-                }
-            });
-
-            // Toggle FAB
-            const fab = document.getElementById('fab-add');
-            if (['create', 'profile', 'availability'].includes(view)) fab.classList.add('hidden');
-            else fab.classList.remove('hidden');
-
-            renderView(view, params);
-        }
-
-        function renderView(view, params) {
+        function renderDashboard() {
             const container = document.getElementById('main-content');
-            container.innerHTML = '';
-
-            switch(view) {
-                case 'dashboard': renderDashboard(container); break;
-                case 'schedules': renderSchedules(container); break;
-                case 'create': renderCreate(container, params); break;
-                case 'availability': renderAvailability(container); break;
-                case 'profile': renderProfile(container); break;
-            }
-        }
-
-        // ==========================================
-        // VIEWS
-        // ==========================================
-        
-        // --- DASHBOARD ---
-        function renderDashboard(container) {
             const today = new Date().toISOString().split('T')[0];
-            const myTasks = schedulesCache.filter(s => s.date === today && s.trainer_id === currentUser.id);
-            const allTasksToday = schedulesCache.filter(s => s.date === today);
+            const todayTasks = allSchedules.filter(s => s.date === today && (userProfile.role !== 'Trainer' || s.trainer_id === currentUser.id));
             
-            const displayTasks = (userProfile.role === 'Trainer') ? myTasks : allTasksToday;
-
             container.innerHTML = `
-                <div class="bg-gradient-primary rounded-2xl p-6 text-white shadow-glow mb-6 fade-in">
-                    <h2 class="text-xl font-bold">สวัสดี, ${userProfile.display_name}</h2>
-                    <p class="text-blue-100 text-sm opacity-80">${userProfile.team} | ${userProfile.role}</p>
-                    <div class="mt-4 flex gap-4">
-                        <div>
-                            <span class="text-2xl font-bold">${displayTasks.length}</span>
-                            <span class="text-xs opacity-70 block">งานวันนี้</span>
-                        </div>
-                    </div>
+                <div class="bg-gradient-primary rounded-2xl p-6 text-white shadow-lg mb-4">
+                    <p class="text-xs opacity-80">ตารางวันนี้</p>
+                    <h2 class="text-2xl font-bold">${todayTasks.length} งาน</h2>
                 </div>
-
-                <div class="flex justify-between items-center px-1 mb-2 fade-in">
-                    <h3 class="font-bold text-slate-700">รายการวันนี้</h3>
-                    ${displayTasks.length === 0 ? '' : '<span class="text-xs text-slate-400">ล่าสุด</span>'}
-                </div>
-
-                <div class="space-y-3 fade-in">
-                    ${displayTasks.length === 0 ? 
-                        `<div class="text-center py-10 text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">ไม่มีตารางงานวันนี้</div>` : 
-                        displayTasks.map(task => renderTaskCard(task)).join('')
-                    }
+                <h3 class="font-bold text-slate-700 mb-2">งานที่รอมอบหมาย</h3>
+                <div class="space-y-3">
+                    ${todayTasks.length ? todayTasks.map(t => `<div class="p-4 bg-white rounded-xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between text-xs mb-1"><span class="font-bold text-blue-600">${t.start_time.slice(0,5)} น.</span> <span class="text-slate-400">${t.audience}</span></div>
+                        <div class="font-bold text-sm">${t.course_detail}</div>
+                        <div class="text-[10px] text-slate-400 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> ${t.location}</div>
+                    </div>`).join('') : '<p class="text-xs text-slate-400 text-center py-8">วันนี้ยังไม่มีงาน</p>'}
                 </div>
             `;
         }
 
-        // --- SCHEDULE LIST ---
-        function renderSchedules(container) {
-            // Group by date
-            const grouped = {};
-            schedulesCache.forEach(task => {
-                if (!grouped[task.date]) grouped[task.date] = [];
-                grouped[task.date].push(task);
-            });
-            const dates = Object.keys(grouped).sort();
-
-            let html = `<div class="pb-20 fade-in">`;
-            if (dates.length === 0) {
-                html += `<div class="text-center py-20 text-slate-400">ไม่มีข้อมูลตารางงานในระบบ</div>`;
-            } else {
-                dates.forEach(date => {
-                    const d = new Date(date);
-                    const dateDisplay = d.toLocaleDateString('th-TH', { weekday:'short', day:'numeric', month:'short' });
-                    html += `<div class="sticky top-[73px] bg-slate-50/95 py-2 px-1 z-10 text-xs font-bold text-slate-400 mt-2">${dateDisplay}</div>`;
-                    html += `<div class="space-y-3">`;
-                    grouped[date].forEach(task => { html += renderTaskCard(task); });
-                    html += `</div>`;
-                });
-            }
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function renderTaskCard(task) {
-            const isOnline = task.method === 'Online';
-            const audienceColor = task.audience === 'ttb' ? 'bg-blue-600' : 
-                                  task.audience === 'PD ttb' || task.audience === 'PRU' ? 'bg-red-500' : 
-                                  'bg-green-500';
-            
-            return `
-                <div class="bg-white p-4 rounded-xl shadow-soft border border-slate-100 relative group">
-                    <div class="flex items-start gap-3">
-                        <div class="w-1 self-stretch rounded-full ${audienceColor}"></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500">${task.audience}</span>
-                                <span class="text-xs font-bold text-blue-600">${task.start_time.slice(0,5)}</span>
-                            </div>
-                            <h4 class="text-sm font-bold text-slate-800 truncate">${task.course_detail}</h4>
-                            <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
-                                <span class="flex items-center gap-1"><i class="fa-solid fa-${isOnline ? 'video' : 'location-dot'}"></i> ${isOnline ? 'Online' : task.location}</span>
-                                <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                                <span class="truncate max-w-[100px]">${task.profiles?.display_name || 'Unknown'}</span>
-                            </div>
-                        </div>
-                    </div>
-                    ${(userProfile.role === 'Master' || userProfile.role === 'Admin' || task.trainer_id === currentUser.id) ? 
-                        `<button onclick="deleteTask('${task.id}')" class="absolute top-2 right-2 p-2 text-slate-200 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
-                </div>
-            `;
-        }
-
-        // --- CREATE TASK ---
-        function renderCreate(container, params) {
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Trainer Options: Only Admin/Master can select others
-            let trainerSelect = '';
-            if (['Master', 'Admin'].includes(userProfile.role)) {
-                trainerSelect = `
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-slate-500 mb-1">เทรนเนอร์ (เลือกได้หลายคน)</label>
-                        <select id="c-trainers" multiple class="input-rounded w-full px-4 py-3 bg-white text-sm h-32">
-                            ${allProfiles.filter(p => p.role !== 'Master').map(p => `<option value="${p.id}" selected>${p.display_name}</option>`).join('')}
-                        </select>
-                        <div class="text-[10px] text-slate-400 mt-1 text-right">กด Ctrl/Cmd ค้างเพื่อเลือกหลายคน</div>
-                    </div>`;
-            } else {
-                trainerSelect = `<input type="hidden" id="c-trainers" value="${currentUser.id}">`;
-            }
-
+        function renderCreate() {
+            const container = document.getElementById('main-content');
             container.innerHTML = `
-                <div class="flex items-center gap-2 mb-4">
-                    <button onclick="navigateTo('dashboard')" class="text-slate-400"><i class="fa-solid fa-arrow-left"></i></button>
-                    <h2 class="text-xl font-bold text-slate-800">สร้างงานใหม่</h2>
-                </div>
-                
-                <form id="create-form" class="bg-white p-5 rounded-2xl shadow-soft space-y-4">
+                <h2 class="text-xl font-bold mb-4">ลงตารางงานใหม่</h2>
+                <form id="create-form" class="space-y-4 bg-white p-5 rounded-2xl shadow-sm border">
+                    <div id="conflict-msg" class="hidden p-3 bg-red-100 text-red-700 text-xs rounded-lg font-bold"></div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">วันที่</label>
-                        <input type="date" id="c-date" required value="${today}" class="input-rounded w-full px-4 py-3 bg-white text-sm">
+                        <input type="date" id="c-date" required class="input-rounded w-full px-4 py-3 text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1">เริ่ม</label>
-                            <input type="time" id="c-start" required value="09:00" class="input-rounded w-full px-4 py-3 bg-white text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 mb-1">ถึง</label>
-                            <input type="time" id="c-end" required value="12:00" class="input-rounded w-full px-4 py-3 bg-white text-sm">
-                        </div>
-                    </div>
-                    
-                    ${trainerSelect}
-
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">Audience</label>
-                        <select id="c-audience" class="input-rounded w-full px-4 py-3 bg-white text-sm">
-                            <option value="ttb">ttb</option>
-                            <option value="PD ttb">PD ttb</option>
-                            <option value="PRU">PRU</option>
-                            <option value="Customer">Customer</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">เริ่ม</label><input type="time" id="c-start" required class="input-rounded w-full px-3 py-3 text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 mb-1">ถึง</label><input type="time" id="c-end" required class="input-rounded w-full px-3 py-3 text-sm"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">รูปแบบ</label>
-                        <div class="flex gap-2">
-                            <label class="flex-1 cursor-pointer">
-                                <input type="radio" name="c-method" value="Online" class="peer sr-only">
-                                <div class="p-2 rounded-lg border text-center text-sm peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-600">Online</div>
-                            </label>
-                            <label class="flex-1 cursor-pointer">
-                                <input type="radio" name="c-method" value="f2f" class="peer sr-only" checked>
-                                <div class="p-2 rounded-lg border text-center text-sm peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-600">F2F</div>
-                            </label>
-                        </div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">รายละเอียดหลักสูตร</label>
+                        <input type="text" id="c-detail" required class="input-rounded w-full px-4 py-3 text-sm" placeholder="เช่น Product Training">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">รายละเอียด</label>
-                        <input type="text" id="c-detail" required placeholder="ชื่อหลักสูตร..." class="input-rounded w-full px-4 py-3 bg-white text-sm">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">สถานที่ / ลิงก์</label>
+                        <input type="text" id="c-location" required class="input-rounded w-full px-4 py-3 text-sm" placeholder="ห้องประชุม หรือ Online">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">สถานที่</label>
-                        <input type="text" id="c-location" required placeholder="@Office" class="input-rounded w-full px-4 py-3 bg-white text-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-primary text-white font-bold py-4 rounded-xl shadow-glow">บันทึก</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-md">บันทึกงาน</button>
                 </form>
             `;
 
             document.getElementById('create-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const msg = document.getElementById('conflict-msg');
+                msg.classList.add('hidden');
                 showLoading(true);
-                
-                try {
-                    const date = document.getElementById('c-date').value;
-                    const start = document.getElementById('c-start').value;
-                    const end = document.getElementById('c-end').value;
-                    const audience = document.getElementById('c-audience').value;
-                    const method = document.querySelector('input[name="c-method"]:checked').value;
-                    const detail = document.getElementById('c-detail').value;
-                    const loc = document.getElementById('c-location').value;
-                    
-                    // Get Trainers
-                    let trainerIds = [];
-                    const trainerEl = document.getElementById('c-trainers');
-                    if (trainerEl.tagName === 'SELECT') {
-                        trainerIds = Array.from(trainerEl.selectedOptions).map(o => o.value);
-                    } else {
-                        trainerIds = [trainerEl.value];
-                    }
 
-                    // Calc Service Hours
-                    const hStart = parseInt(start.split(':')[0]) + parseInt(start.split(':')[1])/60;
-                    const hEnd = parseInt(end.split(':')[0]) + parseInt(end.split(':')[1])/60;
-                    const hours = Math.max(0, hEnd - hStart);
+                const date = document.getElementById('c-date').value;
+                const start = document.getElementById('c-start').value;
+                const end = document.getElementById('c-end').value;
 
-                    // Insert Loop
-                    const inserts = trainerIds.map(tid => {
-                        const tProfile = allProfiles.find(p => p.id === tid);
-                        return {
-                            date, start_time: start, end_time: end, audience, method, 
-                            course_detail: detail, location: loc, service_hours: hours,
-                            trainer_id: tid, team_group: tProfile?.team || 'Unknown'
-                        };
-                    });
+                // --- 🚩 CHECK CONFLICT (ตรวจสอบความว่าง) ---
+                const hasConflict = allSchedules.some(s => 
+                    s.trainer_id === currentUser.id && 
+                    s.date === date && 
+                    ((start >= s.start_time && start < s.end_time) || (end > s.start_time && end <= s.end_time))
+                );
 
-                    const { error } = await supabase.from('schedules').insert(inserts);
-                    
-                    if (error) throw error;
-                    
-                    await refreshSchedules();
-                    navigateTo('schedules');
-                } catch (err) {
-                    alert('Error: ' + err.message);
-                } finally {
+                if (hasConflict) {
+                    msg.textContent = "❌ ไม่สามารถลงงานได้: คุณมีงานอื่นในช่วงเวลานี้แล้ว";
+                    msg.classList.remove('hidden');
                     showLoading(false);
+                    return;
                 }
+
+                // --- SAVE DATA ---
+                const { error } = await supabaseClient.from('schedules').insert([{
+                    date, start_time: start, end_time: end, 
+                    course_detail: document.getElementById('c-detail').value,
+                    location: document.getElementById('c-location').value,
+                    trainer_id: currentUser.id,
+                    team_group: userProfile.team,
+                    audience: 'ttb' // Default
+                }]);
+
+                if (error) { alert(error.message); showLoading(false); }
+                else { await refreshSchedules(); renderDashboard(); showLoading(false); }
             });
         }
 
-        async function deleteTask(id) {
-            if(!confirm('ยืนยันลบรายการนี้?')) return;
-            showLoading(true);
-            try {
-                await supabase.from('schedules').delete().eq('id', id);
-                await refreshSchedules();
-                renderView(currentView); // Rerender
-            } catch (err) {
-                alert('Error deleting task');
-                console.error(err);
-            } finally {
-                showLoading(false);
-            }
-        }
+        // Dummy/Placeholder for other views
+        function renderSchedules() { document.getElementById('main-content').innerHTML = '<h2 class="font-bold">ตารางงานทั้งหมด</h2><p class="text-xs text-slate-400 mt-4">กำลังพัฒนาระบบตัวกรอง...</p>'; }
+        function renderAvailability() { document.getElementById('main-content').innerHTML = '<h2 class="font-bold">ค้นหาวันว่าง</h2>'; }
+        function renderProfile() { document.getElementById('main-content').innerHTML = '<h2 class="font-bold">โปรไฟล์</h2><button onclick="handleLogout()" class="mt-4 p-3 bg-red-100 text-red-600 rounded-xl text-sm w-full font-bold">ออกจากระบบ</button>'; }
 
-        // --- AVAILABILITY (ADVANCED) ---
-        function renderAvailability(container) {
-            container.innerHTML = `
-                <div class="space-y-4 fade-in">
-                    <h2 class="text-xl font-bold text-slate-800">ค้นหาวันว่าง</h2>
-                    
-                    <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100">
-                        <!-- 1. เลือกกลุ่ม -->
-                        <div class="mb-4">
-                            <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">1. เลือกกลุ่มเป้าหมาย</label>
-                            <select id="av-scope" class="input-rounded w-full px-3 py-2 bg-slate-50 text-sm mb-2" onchange="toggleAvScope()">
-                                <option value="all">ทุกคน (All Trainers)</option>
-                                <option value="team">รายทีม (Team)</option>
-                                <option value="manual">เลือกเอง (Manual)</option>
-                            </select>
-                            
-                            <div id="av-team-div" class="hidden">
-                                <select id="av-team-sel" class="input-rounded w-full px-3 py-2 bg-slate-50 text-sm">
-                                    <option value="Training Specialist">Training Specialist</option>
-                                    <option value="Mandatory">Mandatory</option>
-                                </select>
-                            </div>
-                            
-                            <div id="av-manual-div" class="hidden">
-                                <select id="av-manual-sel" multiple class="input-rounded w-full px-3 py-2 bg-slate-50 text-sm h-32">
-                                    ${allProfiles.filter(p => p.role !== 'Master').map(p => `<option value="${p.id}">${p.display_name} (${p.user_id_code})</option>`).join('')}
-                                </select>
-                                <div class="text-[10px] text-slate-400 text-right mt-1">กด Ctrl ค้างเพื่อเลือกหลายคน</div>
-                            </div>
-                        </div>
-
-                        <!-- 2. เลือกโหมด -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">2. วิธีการค้นหา</label>
-                            <div class="grid grid-cols-1 gap-2">
-                                <button onclick="searchAv('earliest')" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors text-left group">
-                                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center mr-3 group-hover:bg-amber-500 group-hover:text-white transition-colors"><i class="fa-solid fa-bolt"></i></div>
-                                    <div>
-                                        <div class="text-sm font-bold text-slate-700">เร็วที่สุด</div>
-                                        <div class="text-[10px] text-slate-400">วันที่ทุกคนว่างพร้อมกัน</div>
-                                    </div>
-                                </button>
-                                
-                                <button onclick="searchAv('month')" class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors text-left group">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i class="fa-regular fa-calendar"></i></div>
-                                    <div>
-                                        <div class="text-sm font-bold text-slate-700">ดูทั้งเดือน</div>
-                                        <div class="text-[10px] text-slate-400">ภาพรวมความว่างในเดือนนี้</div>
-                                    </div>
-                                </button>
-                                
-                                <div class="flex items-center gap-2">
-                                    <input type="date" id="av-spec-date" class="input-rounded flex-1 px-3 py-2 text-sm">
-                                    <button onclick="searchAv('specific')" class="w-12 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-colors flex items-center justify-center">
-                                        <i class="fa-solid fa-magnifying-glass"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ผลลัพธ์ -->
-                    <div id="av-result" class="space-y-3 pb-20"></div>
-                </div>
-            `;
-            
-            // Set default date to tomorrow
-            const tmr = new Date(); tmr.setDate(tmr.getDate() + 1);
-            document.getElementById('av-spec-date').value = tmr.toISOString().split('T')[0];
-        }
-
-        window.toggleAvScope = () => {
-            const val = document.getElementById('av-scope').value;
-            document.getElementById('av-team-div').classList.toggle('hidden', val !== 'team');
-            document.getElementById('av-manual-div').classList.toggle('hidden', val !== 'manual');
-        }
-
-        window.searchAv = (mode) => {
-            const scope = document.getElementById('av-scope').value;
-            let targetIds = [];
-
-            // 1. Get Target IDs
-            if (scope === 'all') {
-                targetIds = allProfiles.filter(p => p.role !== 'Master').map(p => p.id);
-            } else if (scope === 'team') {
-                const teamName = document.getElementById('av-team-sel').value;
-                targetIds = allProfiles.filter(p => p.team === teamName).map(p => p.id);
-            } else {
-                const opts = document.getElementById('av-manual-sel').selectedOptions;
-                targetIds = Array.from(opts).map(o => o.value);
-            }
-
-            if (targetIds.length === 0) { alert('กรุณาเลือกสมาชิกอย่างน้อย 1 คน'); return; }
-
-            const resDiv = document.getElementById('av-result');
-            resDiv.innerHTML = '<div class="text-center py-4"><div class="loader mx-auto"></div></div>';
-
-            // 2. Logic
-            setTimeout(() => {
-                let html = '';
-                
-                if (mode === 'earliest') {
-                    const date = findEarliestDate(targetIds);
-                    if (date) {
-                        const dStr = new Date(date).toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-                        html = `
-                            <div class="bg-green-50 border border-green-200 p-5 rounded-2xl text-center">
-                                <div class="text-xs text-green-600 font-bold uppercase mb-2">เร็วที่สุดที่ว่างพร้อมกัน</div>
-                                <div class="text-2xl font-bold text-green-700">${dStr}</div>
-                                <div class="text-sm text-green-600 mt-1">จากสมาชิก ${targetIds.length} คน</div>
-                            </div>
-                        `;
-                    } else {
-                        html = `<div class="bg-red-50 p-4 rounded-xl text-center text-red-500 text-sm">ไม่พบวันที่ว่างพร้อมกันใน 60 วันข้างหน้า</div>`;
-                    }
-                } 
-                else if (mode === 'month') {
-                    html = renderMonthGrid(targetIds);
-                } 
-                else if (mode === 'specific') {
-                    const date = document.getElementById('av-spec-date').value;
-                    if(!date) { alert('กรุณาเลือกวันที่'); return; }
-                    html = renderSpecificDate(date, targetIds);
-                }
-
-                resDiv.innerHTML = html;
-            }, 300);
-        }
-
-        function findEarliestDate(ids) {
-            let d = new Date();
-            d.setDate(d.getDate() + 1); // Start tomorrow
-            for(let i=0; i<60; i++) {
-                if (d.getDay() !== 0 && d.getDay() !== 6) { // Skip weekends
-                    const dateStr = d.toISOString().split('T')[0];
-                    const isBusy = schedulesCache.some(s => s.date === dateStr && ids.includes(s.trainer_id));
-                    if (!isBusy) return dateStr;
-                }
-                d.setDate(d.getDate() + 1);
-            }
-            return null;
-        }
-
-        function renderMonthGrid(ids) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            let html = `
-                <div class="bg-white p-4 rounded-2xl shadow-soft">
-                    <h3 class="font-bold text-center mb-4">${now.toLocaleDateString('th-TH', { month:'long', year:'numeric' })}</h3>
-                    <div class="cal-grid mb-4">
-                        <div class="text-center text-[10px] text-slate-400">อา</div>
-                        <div class="text-center text-[10px] text-slate-400">จ</div>
-                        <div class="text-center text-[10px] text-slate-400">อ</div>
-                        <div class="text-center text-[10px] text-slate-400">พ</div>
-                        <div class="text-center text-[10px] text-slate-400">พฤ</div>
-                        <div class="text-center text-[10px] text-slate-400">ศ</div>
-                        <div class="text-center text-[10px] text-slate-400">ส</div>
-            `;
-
-            // Empty slots
-            const firstDay = new Date(year, month, 1).getDay();
-            for(let i=0; i<firstDay; i++) html += `<div class="cal-cell empty"></div>`;
-
-            // Days
-            for(let d=1; d<=daysInMonth; d++) {
-                const dateObj = new Date(year, month, d);
-                const dateStr = dateObj.toISOString().split('T')[0];
-                const dayOfWeek = dateObj.getDay();
-                
-                // Logic
-                const busyCount = ids.filter(id => schedulesCache.some(s => s.date === dateStr && s.trainer_id === id)).length;
-                
-                let statusClass = '';
-                if (dayOfWeek === 0 || dayOfWeek === 6) statusClass = 'weekend';
-                else if (busyCount === 0) statusClass = 'free';
-                else if (busyCount === ids.length) statusClass = 'busy';
-                else statusClass = 'partial';
-
-                html += `
-                    <div class="cal-cell ${statusClass}" onclick="document.getElementById('av-spec-date').value='${dateStr}'; searchAv('specific')">
-                        <div class="font-bold">${d}</div>
-                        ${statusClass !== 'weekend' ? `<div class="text-[8px] opacity-70">${ids.length - busyCount}/${ids.length}</div>` : ''}
-                    </div>
-                `;
-            }
-
-            html += `</div>
-                <div class="flex justify-center gap-3 text-[10px]">
-                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-green-200 rounded"></div> ว่างครบ</div>
-                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-amber-100 rounded"></div> ว่างบางคน</div>
-                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-red-100 rounded"></div> ไม่ว่าง</div>
-                </div>
-            </div>`;
-            return html;
-        }
-
-        function renderSpecificDate(dateStr, ids) {
-            const dateDisplay = new Date(dateStr).toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long' });
-            
-            const busyList = [];
-            const freeList = [];
-            
-            ids.forEach(id => {
-                const profile = allProfiles.find(p => p.id === id);
-                const task = schedulesCache.find(s => s.date === dateStr && s.trainer_id === id);
-                
-                if (task) busyList.push({ profile, task });
-                else freeList.push(profile);
-            });
-
-            return `
-                <div class="bg-white p-4 rounded-2xl shadow-soft">
-                    <h3 class="font-bold text-center text-slate-800 mb-1">${dateDisplay}</h3>
-                    <div class="text-center text-xs text-slate-400 mb-4">สถานะของกลุ่มที่เลือก (${ids.length} คน)</div>
-
-                    <!-- Free -->
-                    <div class="mb-4">
-                        <div class="text-xs font-bold text-green-600 mb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-check-circle"></i> ว่าง (${freeList.length})
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            ${freeList.length === 0 ? '<span class="text-xs text-slate-400">- ไม่มีใครว่าง -</span>' : 
-                                freeList.map(p => `<span class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg border border-green-100">${p.display_name}</span>`).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Busy -->
-                    <div>
-                        <div class="text-xs font-bold text-red-500 mb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-circle-xmark"></i> ติดงาน (${busyList.length})
-                        </div>
-                        <div class="space-y-2">
-                            ${busyList.length === 0 ? '<span class="text-xs text-slate-400">- ไม่มีใครติดงาน -</span>' : 
-                                busyList.map(item => `
-                                    <div class="flex items-center justify-between text-xs p-2 bg-slate-50 rounded-lg border border-slate-100">
-                                        <span class="font-medium text-slate-700">${item.profile.display_name}</span>
-                                        <span class="text-slate-400 truncate max-w-[120px]">${item.task.audience}</span>
-                                    </div>
-                                `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- PROFILE ---
-        function renderProfile(container) {
-            container.innerHTML = `
-                <div class="flex flex-col items-center pt-8 pb-6 bg-white rounded-2xl shadow-soft mb-6">
-                    <div class="w-24 h-24 rounded-full bg-slate-200 mb-4 flex items-center justify-center text-3xl text-slate-400 overflow-hidden">
-                        ${userProfile.avatar_url ? `<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-user"></i>'}
-                    </div>
-                    <h2 class="text-xl font-bold text-slate-800">${userProfile.display_name}</h2>
-                    <p class="text-sm text-slate-500 mb-1">${userProfile.team}</p>
-                    <div class="flex gap-2 text-[10px] text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-                        <span>${userProfile.user_id_code || '-'}</span> | <span>${userProfile.role}</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-                    <div class="p-4 border-b border-slate-50">
-                        <div class="text-xs text-slate-400 mb-1">Calendar ID</div>
-                        <div class="text-xs bg-slate-50 p-2 rounded text-slate-600 break-all font-mono">${userProfile.calendar_id || 'Not Connected'}</div>
-                    </div>
-                    <button class="w-full p-4 text-left text-sm text-slate-700 hover:bg-slate-50 flex justify-between items-center">
-                        เปลี่ยนรหัสผ่าน <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
-                    </button>
-                    <button onclick="logout()" class="w-full p-4 text-left text-sm text-red-500 hover:bg-red-50 font-medium flex justify-between items-center">
-                        ออกจากระบบ <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
-            `;
-        }
+        function showLoading(s) { document.getElementById('loading-overlay').classList.toggle('hidden', !s); }
+        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.reload(); }
+        
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        window.onload = init;
     </script>
 </body>
 </html>
-
 

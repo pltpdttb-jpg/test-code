@@ -285,12 +285,16 @@
             document.getElementById('user-avatar').textContent = (p.display_name || 'U').substring(0, 2);
             
             // Show user management button for admin/master only
-            const userManagementBtn = document.getElementById('user-management-btn');
-            if (p.role === 'admin' || p.role === 'master') {
-                userManagementBtn.classList.remove('hidden');
-            } else {
-                userManagementBtn.classList.add('hidden');
-            }
+            const reportsBtn = document.getElementById('reports-btn');
+const userManagementBtn = document.getElementById('user-management-btn');
+
+if (p.role === 'admin' || p.role === 'master') {
+    reportsBtn.classList.remove('hidden');
+    userManagementBtn.classList.remove('hidden');
+} else {
+    reportsBtn.classList.add('hidden');
+    userManagementBtn.classList.add('hidden');
+}
             
             // Switch screens
             document.getElementById('login-screen').classList.add('hidden');

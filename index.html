@@ -46,7 +46,7 @@
     <script>
         const SUPABASE_URL = 'https://qcvorkbqdsdcphpflksa.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjdm9ya2JxZHNkY3BocGZsa3NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMTQ2MjUsImV4cCI6MjA4NDg5MDYyNX0.LMsGr_kitA7bSb4IHSa6kEP9Tu35Y2YFc71Hyq76eq0';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // Global variables
         let authUser = null;
@@ -138,7 +138,7 @@
     <!-- CONFIRMATION MODAL -->
     <div id="confirmation-modal" class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl p-6 m-4 max-w-sm w-full">
-            <h3 class="font-bold text-lg mb-2" id="modal-title">ยืนยันการลบ</h3>
+            <h3 class="font-bold text-lg" id="modal-title">ยืนยันการลบ</h3>
             <p class="text-slate-600 mb-6" id="modal-message">คุณแน่ใจหรือไม่ที่ต้องการลบรายการนี้?</p>
             <div class="flex gap-3">
                 <button onclick="hideModal()" class="flex-1 py-3 border border-slate-300 rounded-xl text-slate-700">ยกเลิก</button>
@@ -235,7 +235,7 @@
                 let email = loginId;
                 
                 if (!loginId.includes('@')) {
-                    const { data: p, error: pErr } = await supabase
+                    const { data: p, error: pErr } = await supabaseClient
                         .from('profiles')
                         .select('email')
                         .eq('user_id_code', loginId)
@@ -246,7 +246,7 @@
                     }
                 }
 
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -267,7 +267,7 @@
             authUser = user;
             
             // Load profile
-            const { data: p, error } = await supabase
+            const { data: p, error } = await supabaseClient
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
@@ -310,7 +310,7 @@
         }
 
         async function loadAllUsers() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('profiles')
                 .select('*')
                 .order('display_name');
@@ -319,7 +319,7 @@
         }
 
         async function loadAllTasks() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('tasks')
                 .select(`
                     *,
@@ -333,7 +333,7 @@
 
         async function handleLogout() {
             showModal('ออกจากระบบ', 'คุณแน่ใจหรือไม่ที่จะออกจากระบบ?', async () => {
-                await supabase.auth.signOut();
+                await supabaseClient.auth.signOut();
                 window.location.reload();
             });
         }
@@ -346,7 +346,7 @@
             const today = new Date().toISOString().split('T')[0];
             const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
             
-            const { data: userTasks } = await supabase
+            const { data: userTasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .or(`and(trainer_id.eq.${authUser.id},date.eq.${today}),and(trainer_id.eq.${authUser.id},date.eq.${tomorrow})`)
@@ -356,7 +356,7 @@
             const currentMonth = new Date().getMonth() + 1;
             const currentYear = new Date().getFullYear();
             
-            const { data: monthTasks } = await supabase
+            const { data: monthTasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .eq('trainer_id', authUser.id)
@@ -374,7 +374,7 @@
             const f2fCount = monthTasks ? monthTasks.filter(t => t.format === 'F2F').length : 0;
             
             // Get team stats
-            const { data: teamTasks } = await supabase
+            const { data: teamTasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .gte('date', `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`)
@@ -597,7 +597,7 @@
             const calendarEl = document.getElementById('calendar');
             
             // Get user's tasks
-            const { data: userTasks } = await supabase
+            const { data: userTasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .eq('trainer_id', authUser.id)
@@ -663,7 +663,7 @@
         }
 
         async function loadTeamCalendar() {
-            const { data: allTasks } = await supabase
+            const { data: allTasks } = await supabaseClient
                 .from('tasks')
                 .select(`
                     *,
@@ -686,7 +686,7 @@
         }
 
         async function renderTaskList() {
-            const { data: tasks } = await supabase
+            const { data: tasks } = await supabaseClient
                 .from('tasks')
                 .select(`
                     *,
@@ -741,7 +741,7 @@
         }
 
         async function renderTeamHeatmap() {
-            const { data: allTasks } = await supabase
+            const { data: allTasks } = await supabaseClient
                 .from('tasks')
                 .select(`
                     *,
@@ -928,7 +928,7 @@
             const condition = document.getElementById('search-condition').value;
             
             // Get all tasks for selected users
-            const { data: tasks } = await supabase
+            const { data: tasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .in('trainer_id', selectedUserIds);
@@ -1153,11 +1153,11 @@
             showLoading(true);
             
             // Get team statistics
-            const { data: teamTasks } = await supabase
+            const { data: teamTasks } = await supabaseClient
                 .from('tasks')
                 .select('*');
             
-            const { data: teamUsers } = await supabase
+            const { data: teamUsers } = await supabaseClient
                 .from('profiles')
                 .select('*')
                 .neq('role', 'master');
@@ -1358,7 +1358,7 @@
             const tomorrowStr = tomorrow.toISOString().split('T')[0];
             
             // Get tasks for tomorrow
-            const { data: tasks } = await supabase
+            const { data: tasks } = await supabaseClient
                 .from('tasks')
                 .select(`
                     *,
@@ -1603,7 +1603,7 @@
             
             switch(exportType) {
                 case 'tasks':
-                    const { data: tasks } = await supabase
+                    const { data: tasks } = await supabaseClient
                         .from('tasks')
                         .select(`
                             *,
@@ -1617,7 +1617,7 @@
                     break;
                     
                 case 'users':
-                    const { data: users } = await supabase
+                    const { data: users } = await supabaseClient
                         .from('profiles')
                         .select('*');
                     
@@ -1627,7 +1627,7 @@
                     
                 case 'statistics':
                     // Generate statistics data
-                    const { data: allTasks } = await supabase
+                    const { data: allTasks } = await supabaseClient
                         .from('tasks')
                         .select('*')
                         .gte('date', startDate)
@@ -1811,7 +1811,7 @@
                 return;
             }
             
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('profiles')
                 .update({
                     full_name: fullName,
@@ -1827,7 +1827,7 @@
             } else {
                 showNotification('อัพเดทโปรไฟล์เรียบร้อยแล้ว', 'success');
                 // Reload profile data
-                const { data: p } = await supabase
+                const { data: p } = await supabaseClient
                     .from('profiles')
                     .select('*')
                     .eq('id', authUser.id)
@@ -1871,7 +1871,7 @@
             
             try {
                 // First, verify current password by trying to reauthenticate
-                const { error: signInError } = await supabase.auth.signInWithPassword({
+                const { error: signInError } = await supabaseClient.auth.signInWithPassword({
                     email: authUser.email,
                     password: currentPassword
                 });
@@ -1883,7 +1883,7 @@
                 }
                 
                 // Update password
-                const { error: updateError } = await supabase.auth.updateUser({
+                const { error: updateError } = await supabaseClient.auth.updateUser({
                     password: newPassword
                 });
                 
@@ -2101,7 +2101,7 @@
             
             try {
                 // Create user in Supabase Auth
-                const { data: authData, error: authError } = await supabase.auth.signUp({
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {
@@ -2115,7 +2115,7 @@
                 if (authError) throw authError;
                 
                 // Create profile in profiles table
-                const { error: profileError } = await supabase
+                const { error: profileError } = await supabaseClient
                     .from('profiles')
                     .insert({
                         id: authData.user.id,
@@ -2244,7 +2244,7 @@
             if (newRole && ['trainer', 'training_specialist', 'mandatory', 'admin'].includes(newRole)) {
                 showLoading(true);
                 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('profiles')
                     .update({ role: newRole })
                     .eq('id', userId);
@@ -2472,7 +2472,7 @@
             
             if (!date || !trainerId) return;
             
-            const { data: existingTasks } = await supabase
+            const { data: existingTasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .eq('date', date)
@@ -2491,7 +2491,7 @@
             
             if (!date || !start || !end || !trainerId) return;
             
-            const { data: existingTasks } = await supabase
+            const { data: existingTasks } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .eq('date', date)
@@ -2691,14 +2691,14 @@
                     }));
                     
                     // Insert all tasks
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('tasks')
                         .insert(tasks);
                     
                     result = { data, error };
                 } else {
                     // Create single task
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('tasks')
                         .insert([taskData]);
                     
@@ -2733,7 +2733,7 @@
         async function viewTaskDetail(taskId) {
             showLoading(true);
             
-            const { data: task } = await supabase
+            const { data: task } = await supabaseClient
                 .from('tasks')
                 .select(`
                     *,
@@ -2861,7 +2861,7 @@
 
         async function editTask(taskId) {
             // Load task and prefill form
-            const { data: task } = await supabase
+            const { data: task } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .eq('id', taskId)
@@ -2944,7 +2944,7 @@
             }
             
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('tasks')
                     .update(taskData)
                     .eq('id', taskId);
@@ -2971,7 +2971,7 @@
 
         async function deleteTask(taskId) {
             // Get task to check permissions
-            const { data: task } = await supabase
+            const { data: task } = await supabaseClient
                 .from('tasks')
                 .select('*')
                 .eq('id', taskId)
@@ -2992,7 +2992,7 @@
                     showLoading(true);
                     
                     try {
-                        const { error } = await supabase
+                        const { error } = await supabaseClient
                             .from('tasks')
                             .delete()
                             .eq('id', taskId);
@@ -3035,7 +3035,7 @@
             
             try {
                 // Get existing comments
-                const { data: task } = await supabase
+                const { data: task } = await supabaseClient
                     .from('tasks')
                     .select('comments')
                     .eq('id', taskId)
@@ -3051,7 +3051,7 @@
                 
                 comments.push(newComment);
                 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('tasks')
                     .update({ comments: comments })
                     .eq('id', taskId);
@@ -3097,7 +3097,7 @@
 
         // ==================== INITIALIZATION ====================
         async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 await loadAppData(session.user);
             }
